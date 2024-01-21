@@ -62,7 +62,7 @@ int main() {
 
             GL_Render();
 
-            // swap buffer
+            // Swap framebuffer
             SDL_GL_SwapWindow(window);
         }
 
