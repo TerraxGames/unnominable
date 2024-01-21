@@ -9,5 +9,5 @@ We're under construction! Please come back later.
 ### Arch Linux
 Install these packages with `pacman`.
 ```sh
-pacman -S sdl2 sdl2_image sdl2_gfx sdl2_ttf clang
+pacman -S sdl2 sdl2_image sdl2_gfx sdl2_ttf glew clang
 ```
