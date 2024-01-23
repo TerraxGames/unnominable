@@ -1,17 +1,10 @@
 #include <iostream>
+#include <glad/gl.h>
 #include <SDL.h>
-#include <GL/glew.h>
+#include "render.hpp"
 
 #define WINDOW_WIDTH 1280
 #define WINDOW_HEIGHT 720
-
-bool GL_Init() {
-    return true;
-}
-
-void GL_Render() {}
-
-void GL_Quit() {}
 
 int main() {
     // Initialize SDL
@@ -26,7 +19,7 @@ int main() {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
-    SDL_Window *window = SDL_CreateWindow("Unnominable", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
+    SDL_Window *window = SDL_CreateWindow("Unnominable", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
     if (!window) {
         SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "Failed to create window: %s\n", SDL_GetError());
         SDL_Quit();
@@ -45,7 +38,7 @@ int main() {
     SDL_GL_SetSwapInterval(-1);
 
     // Initialize OpenGL
-    if (GL_Init()) {
+    if (Init()) {
         SDL_Event event;
         bool quit = false;
 
@@ -60,13 +53,13 @@ int main() {
                 }
             }
 
-            GL_Render();
+            Render();
 
             // Swap framebuffer
             SDL_GL_SwapWindow(window);
         }
 
-        GL_Quit();
+        Quit();
     }
 
     SDL_GL_DeleteContext(glContext);
