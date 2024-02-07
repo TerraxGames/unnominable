@@ -6,10 +6,13 @@ project(unnominable
         VERSION 0.1.0.0)
 add_executable(${PROJECT_NAME}
         src/main.cpp
+        src/main.hpp
         src/render.cpp
-        src/render.hpp)
+        src/render.hpp
+        src/shader.cpp
+        src/shader.hpp)
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/sdl2)
 
 find_package(SDL2 REQUIRED)
 find_package(SDL2_image REQUIRED)

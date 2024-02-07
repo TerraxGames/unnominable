@@ -1,5 +1,7 @@
 # build files
-/build/*
+/bin
+/build
+/.cache
 
 # vscode extensions
 /.trunk/*
@@ -152,6 +154,3 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/cmake,c++,visualstudiocode,macos,windows,linux
-
-# unignores
-!/lib/glew/**/Makefile

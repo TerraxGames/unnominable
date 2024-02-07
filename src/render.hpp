@@ -1,16 +1,24 @@
-#ifndef __PROJECTS_TERRAXGAMES_UNNOMINABLE_SRC_RENDER_HPP_
-#define __PROJECTS_TERRAXGAMES_UNNOMINABLE_SRC_RENDER_HPP_
+#ifndef UNNOMINABLE_RENDER_HPP_
+#define UNNOMINABLE_RENDER_HPP_
 
-struct GLVars {
-    GLuint vao;
-    GLuint vbo;
-    GLuint mainProgram;
+#include <concepts>
+#include <glad/gl.h>
+#include "shader.hpp"
+
+struct RenderVars {
+    int window_width = 1280;
+    int window_height = 720;
+    bool should_quit = false;
+    Shader shader;
+    GLint success;
+    GLchar info_log[512];
+    GLuint VAO, VBO, color_VBO, EBO;
 };
 
-bool Init();
+bool render_init(RenderVars *render_vars);
 
-void Render();
+void render(RenderVars *render_vars);
 
-void Quit();
+void render_quit();
 
-#endif // __PROJECTS_TERRAXGAMES_UNNOMINABLE_SRC_RENDER_HPP_
+#endif // UNNOMINABLE_RENDER_HPP_

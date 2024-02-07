@@ -1,12 +1,9 @@
 #include <iostream>
-#include <glad/gl.h>
-#include <SDL.h>
-#include "render.hpp"
-
-#define WINDOW_WIDTH 1280
-#define WINDOW_HEIGHT 720
+#include "main.hpp"
 
 int main() {
+    auto render_vars = RenderVars { };
+
     // Initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
         SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "Failed to initialize SDL: %s\n", SDL_GetError());
@@ -19,15 +16,20 @@ int main() {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
-    SDL_Window *window = SDL_CreateWindow("Unnominable", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
+    // don't disable compositing
+    // todo: add option in settings to disable the compositor
+    SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
+
+    int window_flags = SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
+    SDL_Window *window = SDL_CreateWindow("Unnominable", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, render_vars.window_width, render_vars.window_height, window_flags);
     if (!window) {
         SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "Failed to create window: %s\n", SDL_GetError());
         SDL_Quit();
         return 1;
     }
 
-    SDL_GLContext glContext = SDL_GL_CreateContext(window);
-    if (!glContext) {
+    SDL_GLContext gl_context = SDL_GL_CreateContext(window);
+    if (!gl_context) {
         SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "Failed to create OpenGL context: %s\n", SDL_GetError());
         SDL_DestroyWindow(window);
         SDL_Quit();
@@ -38,33 +40,51 @@ int main() {
     SDL_GL_SetSwapInterval(-1);
 
     // Initialize OpenGL
-    if (Init()) {
+    if (render_init(&render_vars)) {
         SDL_Event event;
-        bool quit = false;
 
-        while (!quit) {
+        while (!render_vars.should_quit) {
             while (SDL_PollEvent(&event)) {
-                if (event.type == SDL_QUIT) {
-                    quit = true;
-                } else if (event.type == SDL_KEYDOWN) {
-                    if (event.key.keysym.sym == SDLK_ESCAPE) {
-                        quit = true;
-                    }
-                }
+                handle_SDL_event(&event, &render_vars);
             }
 
-            Render();
+            render(&render_vars);
 
             // Swap framebuffer
             SDL_GL_SwapWindow(window);
         }
 
-        Quit();
+        render_quit();
     }
 
-    SDL_GL_DeleteContext(glContext);
+    SDL_GL_DeleteContext(gl_context);
     SDL_DestroyWindow(window);
     SDL_Quit();
 
     return 0;
+}
+
+void handle_SDL_event(SDL_Event *event, RenderVars *render_vars) {
+    if (event->type == SDL_QUIT) {
+        render_vars->should_quit = true;
+    } else if (event->type == SDL_KEYDOWN) {
+        switch (event->key.keysym.sym) {
+            case SDLK_ESCAPE:
+                render_vars->should_quit = true;
+                break;
+        }
+    }
+
+    if (event->type == SDL_WINDOWEVENT) {
+        switch (event->window.event) {
+            case SDL_WINDOWEVENT_SIZE_CHANGED:
+                int window_width = event->window.data1;
+                int window_height = event->window.data2;
+                glViewport(0, 0, window_width, window_height);
+
+                render_vars->window_width = window_width;
+                render_vars->window_height = window_height;
+                break;
+        }
+    }
 }

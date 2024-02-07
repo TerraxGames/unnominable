@@ -1,0 +1,13 @@
+{
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Launch",
+            "program": "${workspaceFolder}/build/unnominable",
+            "args": [],
+            "preLaunchTask": "CMake: build",
+            "cwd": "${workspaceFolder}/assets"
+        }
+    ]
+}
