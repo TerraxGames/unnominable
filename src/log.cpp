@@ -26,12 +26,15 @@ const std::array<std::string, SDL_LogCategory::SDL_LOG_CATEGORY_CUSTOM>
 
 void UN_LogOutputFunction(void *userdata, int category,
                           SDL_LogPriority priority, const char *message) {
-    LogOptions *options = reinterpret_cast<LogOptions *>(userdata);
-    if (options == nullptr) {
+    if (userdata == nullptr) {
         std::cout << "(Logger) "
                   << UN_LogGetPriorityPrefix(SDL_LOG_PRIORITY_CRITICAL)
-                  << "  Invalid LogOptions!";
+                  << "  LogOptions is nullptr! Try setting the userdata "
+                     "argument to an instance of LogOptions.";
+        return;
     }
+
+    LogOptions *options = reinterpret_cast<LogOptions *>(userdata);
     if (options->print_category) {
         std::cout << "(" << UN_LogGetCategoryPrefix(category) << ") ";
     }

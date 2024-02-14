@@ -4,6 +4,12 @@
 #include <SDL.h>
 #include <SDL_log.h>
 
+#ifdef NDEBUG
+#define UN_LOG_PRIORITY SDL_LOG_PRIORITY_INFO
+#else
+#define UN_LOG_PRIORITY SDL_LOG_PRIORITY_DEBUG
+#endif
+
 struct LogOptions {
     bool print_category = true;
 };

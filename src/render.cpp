@@ -90,7 +90,7 @@ bool render_init(RenderVars *render_vars) {
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     // load first texture
-    auto texture0 = std::make_unique<ImageTexture>("textures/container.jpg");
+    auto texture0 = std::make_unique<ImageTexture>("textures/normal.png");
     texture0->bind_generate();
     texture0->default_parameters();
     texture0->upload();
@@ -104,7 +104,6 @@ bool render_init(RenderVars *render_vars) {
     texture1->default_parameters();
     texture1->upload();
     texture1->generate_mipmap();
-    texture1->free_surface();
     render_vars->texture1 = std::move(texture1);
 
     return true;

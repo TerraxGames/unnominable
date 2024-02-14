@@ -85,7 +85,7 @@ ImageTexture::ImageTexture(const std::string &path)
 
 ImageTexture::~ImageTexture() {
     if (surface != nullptr) {
-        SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
+        SDL_LogWarn(SDL_LOG_CATEGORY_RENDER,
                     "SDL_Surface for texture at path %s wasn't freed!",
                     this->path.c_str()); // give 'em a slap on the wrist
         this->free_surface();

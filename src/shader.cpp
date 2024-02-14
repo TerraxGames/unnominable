@@ -38,7 +38,7 @@ bool Shader::compile_and_link() {
     glGetProgramiv(this->shader_program, GL_LINK_STATUS, &this->success);
     if (!this->success) {
         glGetProgramInfoLog(this->shader_program, 512, NULL, this->info_log);
-        SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION,
+        SDL_LogCritical(SDL_LOG_CATEGORY_RENDER,
                         "Shader program linking failed:\n%s", this->info_log);
         return false;
     }
@@ -80,8 +80,8 @@ bool Shader::compile_shader_pipe(ShaderType shader_type) {
         // https://stackoverflow.com/a/2602060/11774699
         std::ifstream shader_file(file_path);
         if (shader_file.fail()) {
-            SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                         "Failed to find shader %s", file_path.c_str());
+            SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to find shader %s",
+                         file_path.c_str());
             continue;
         }
         std::stringstream shader_buffer;
@@ -105,7 +105,7 @@ bool Shader::compile_shader_pipe(ShaderType shader_type) {
     glGetShaderiv(shader_object, GL_COMPILE_STATUS, &this->success);
     if (!this->success) {
         glGetShaderInfoLog(shader_object, 512, NULL, this->info_log);
-        SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION,
+        SDL_LogCritical(SDL_LOG_CATEGORY_RENDER,
                         "Shader compilation failed:\n%s", this->info_log);
         return false;
     }

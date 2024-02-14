@@ -1,18 +1,14 @@
 #include "main.hpp"
 #include "log.hpp"
+#include <cstdlib>
 #include <iostream>
+#include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_log.h>
 
-#ifdef NDEBUG
-#define UN_LOG_PRIORITY SDL_LOG_PRIORITY_INFO
-#else
-#define UN_LOG_PRIORITY SDL_LOG_PRIORITY_DEBUG
-#endif
-
 int main() {
     // set up logging
-    LogOptions log_options = {};
+    LogOptions log_options{};
     UN_LogSetOptions(log_options);
     SDL_LogSetAllPriority(UN_LOG_PRIORITY);
     SDL_LogSetPriority(SDL_LOG_CATEGORY_ERROR, SDL_LOG_PRIORITY_INFO);
@@ -23,7 +19,7 @@ int main() {
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
         SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION,
                         "Failed to initialize SDL: %s", SDL_GetError());
-        return 1;
+        return EXIT_FAILURE;
     }
 
     // Initialize SDL_image
@@ -31,7 +27,8 @@ int main() {
     if (IMG_Init(sdl_image_flags) != sdl_image_flags) {
         SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION,
                         "Failed to initialize SDL_image: %s", SDL_GetError());
-        return 1;
+        SDL_Quit();
+        return EXIT_FAILURE;
     }
 
     // we don't care about MacOS support, so go ham
@@ -45,25 +42,31 @@ int main() {
     // todo: add option in settings to disable the compositor
     SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
 
+    // set exit function
+    const int exit_registration_result = std::atexit(exit);
+    if (exit_registration_result) {
+        SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION,
+                        "atexit registration failed!");
+        return EXIT_FAILURE;
+    }
+
     int window_flags =
         SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
     SDL_Window *window = SDL_CreateWindow(
         "Unnominable", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
         render_vars.window_width, render_vars.window_height, window_flags);
-    if (!window) {
+    if (window == nullptr) {
         SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION,
                         "Failed to create window: %s", SDL_GetError());
-        SDL_Quit();
-        return 1;
+        return EXIT_FAILURE;
     }
 
     SDL_GLContext gl_context = SDL_GL_CreateContext(window);
-    if (!gl_context) {
+    if (gl_context == nullptr) {
         SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION,
                         "Failed to create OpenGL context: %s", SDL_GetError());
         SDL_DestroyWindow(window);
-        SDL_Quit();
-        return 1;
+        return EXIT_FAILURE;
     }
 
     // Enable VSync
@@ -89,10 +92,13 @@ int main() {
 
     SDL_GL_DeleteContext(gl_context);
     SDL_DestroyWindow(window);
+
+    return EXIT_SUCCESS;
+}
+
+void exit() {
     IMG_Quit();
     SDL_Quit();
-
-    return 0;
 }
 
 void handle_SDL_event(SDL_Event *event, RenderVars *render_vars) {

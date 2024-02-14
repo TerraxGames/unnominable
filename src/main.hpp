@@ -4,6 +4,8 @@
 #include <glad/gl.h>
 #include <SDL.h>
 
+void exit();
+
 void handle_SDL_event(SDL_Event *event, RenderVars *render_vars);
 
 #endif // UNNOMINABLE_MAIN_HPP_
