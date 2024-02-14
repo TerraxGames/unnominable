@@ -15,7 +15,9 @@ add_executable(${PROJECT_NAME}
         src/texture.cpp
         src/texture.hpp
         src/log.cpp
-        src/log.hpp)
+        src/log.hpp
+        src/util.cpp
+        src/util.hpp)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/sdl2)
 

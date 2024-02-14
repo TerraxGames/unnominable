@@ -33,7 +33,7 @@ public:
     virtual const char *what() const throw() { return this->message.c_str(); }
 };
 
-enum TextureFormat {
+enum class TextureFormat {
     RED             = GL_RED,
     RG              = GL_RG,
     RGB             = GL_RGB,
@@ -44,7 +44,7 @@ enum TextureFormat {
     DEPTH_STENCIL   = GL_DEPTH_STENCIL
 };
 
-enum TextureType {
+enum class TextureType {
     TEX1D                   = GL_TEXTURE_1D,
     TEX2D                   = GL_TEXTURE_2D,
     TEX3D                   = GL_TEXTURE_3D,
@@ -58,7 +58,7 @@ enum TextureType {
     TEX2D_MULTISAMPLE_ARRAY = GL_TEXTURE_2D_MULTISAMPLE_ARRAY
 };
 
-enum TextureUnit {
+enum class TextureUnit {
     U0  = GL_TEXTURE0,
     U1  = GL_TEXTURE1,
     U2  = GL_TEXTURE2,
@@ -93,7 +93,7 @@ enum TextureUnit {
     U31 = GL_TEXTURE31,
 };
 
-enum TextureParameter {
+enum class TextureParameter {
     DEPTH_STENCIL_TEXTURE_MODE = GL_DEPTH_STENCIL_TEXTURE_MODE,
     BASE_LEVEL                 = GL_TEXTURE_BASE_LEVEL,
     COMPARE_FUNC               = GL_TEXTURE_COMPARE_FUNC,
@@ -113,12 +113,12 @@ enum TextureParameter {
     WRAP_R                     = GL_TEXTURE_WRAP_R,
 };
 
-enum TextureVectorParameter {
+enum class TextureVectorParameter {
     BORDER_COLOR = GL_TEXTURE_BORDER_COLOR,
     SWIZZLE_RGBA = GL_TEXTURE_SWIZZLE_RGBA,
 };
 
-enum TextureDataType {
+enum class TextureDataType {
     UNSIGNED_BYTE               = GL_UNSIGNED_BYTE,
     BYTE                        = GL_BYTE,
     UNSIGNED_SHORT              = GL_UNSIGNED_SHORT,

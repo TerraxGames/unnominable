@@ -1,4 +1,5 @@
 #include "texture.hpp"
+#include "util.hpp"
 #include <algorithm>
 #include <optional>
 #include <SDL_image.h>
@@ -9,7 +10,9 @@ Texture::Texture(TextureType type) { this->type_ = type; }
 
 void Texture::generate() { glGenTextures(1, &this->object); }
 
-void Texture::bind() { glBindTexture(this->type(), this->object); }
+void Texture::bind() {
+    glBindTexture(util::to_glenum(this->type()), this->object);
+}
 
 void Texture::bind_generate() {
     this->generate();
@@ -17,34 +20,38 @@ void Texture::bind_generate() {
 }
 
 void Texture::bind_active(TextureUnit texture_unit) {
-    glActiveTexture(texture_unit);
+    glActiveTexture(util::to_glenum(texture_unit));
     this->bind();
 }
 
 void Texture::upload_2d(GLsizei width, GLsizei height,
                         TextureDataType data_type) {
-    glTexImage2D(this->type_, 0, this->format, width, height, 0, this->format,
-                 data_type, this->data_);
+    glTexImage2D(util::to_glenum(this->type()), 0,
+                 util::to_glenum(this->format), width, height, 0,
+                 util::to_glenum(this->format), util::to_glenum(data_type),
+                 this->data_);
 }
 
-void Texture::generate_mipmap() { glGenerateMipmap(this->type()); }
+void Texture::generate_mipmap() {
+    glGenerateMipmap(util::to_glenum(this->type()));
+}
 
 void Texture::parameter_f(TextureParameter parameter, GLfloat value) {
-    glTextureParameterf(this->object, parameter, value);
+    glTextureParameterf(this->object, util::to_glenum(parameter), value);
 }
 
 void Texture::parameter_i(TextureParameter parameter, GLint value) {
-    glTextureParameteri(this->object, parameter, value);
+    glTextureParameteri(this->object, util::to_glenum(parameter), value);
 }
 
 void Texture::parameter_fv(TextureVectorParameter parameter,
                            const GLfloat         *values) {
-    glTextureParameterfv(this->object, parameter, values);
+    glTextureParameterfv(this->object, util::to_glenum(parameter), values);
 }
 
 void Texture::parameter_iv(TextureVectorParameter parameter,
                            const GLint           *values) {
-    glTextureParameteriv(this->object, parameter, values);
+    glTextureParameteriv(this->object, util::to_glenum(parameter), values);
 }
 
 Texture2D::Texture2D(TextureType type) : Texture(type) {}

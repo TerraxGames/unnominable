@@ -25,3 +25,4 @@ AlignConsecutiveAssignments:
   AcrossEmptyLines: false
   AcrossComments: true
   AlignCompound: true
+AlwaysBreakTemplateDeclarations: Yes
