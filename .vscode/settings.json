@@ -80,5 +80,12 @@
         "variant": "cpp",
         "gl.h": "c"
     },
-    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"
+    "[cpp]": {
+        "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd"
+    },
+    "[c]": {
+        "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd"
+    },
+    "editor.formatOnPaste": false,
+    "editor.formatOnSave": true
 }

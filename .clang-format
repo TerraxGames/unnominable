@@ -1,0 +1,27 @@
+UseTab: Never
+TabWidth: 4
+IndentWidth: 4
+BinPackArguments: true
+BinPackParameters: true
+ColumnLimit: 80
+AllowShortBlocksOnASingleLine: Empty
+AllowShortFunctionsOnASingleLine: All
+AllowShortEnumsOnASingleLine: false
+AllowShortLambdasOnASingleLine: Inline
+AlignAfterOpenBracket: Align
+PackConstructorInitializers: NextLine
+AccessModifierOffset: -4
+IncludeCategories:
+  - Regex: '<glad\/.+>'
+    Priority: 1
+  - Regex: '<SDL([a-zA-Z0-9_-]+)*\.h>'
+    Priority: 2
+AlignConsecutiveDeclarations:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: true
+AlignConsecutiveAssignments:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: true
+  AlignCompound: true

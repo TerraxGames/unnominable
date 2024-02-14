@@ -1,0 +1,3 @@
+If:
+    PathMatch: .*\.(h|hpp|c|cpp)
+    PathExclude: .*lib/.*

@@ -2,9 +2,11 @@
 out vec4 FragColor;
 
 in vec3 color;
+in vec2 texcoord;
 
-uniform float time;
+uniform sampler2D texture0;
+uniform sampler2D texture1;
 
 void main() {
-    FragColor = vec4(((sin(time / 500.0) + 1.0) / 2) * color, 1.0);
+    FragColor = mix(texture(texture0, texcoord), texture(texture1, texcoord), 0.2);
 }
