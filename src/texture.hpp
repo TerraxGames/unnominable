@@ -173,6 +173,34 @@ public:
     void parameter_f(TextureParameter parameter, GLfloat value);
     /// Sets a texture parameter using glTextureParameteri.
     void parameter_i(TextureParameter parameter, GLint value);
+    /// Sets a texture parameter using glTextureParameterfv.
+    void parameter_fv(TextureVectorParameter parameter, const GLfloat *values);
+    /// Sets a texture parameter using glTextureParameteriv.
+    void parameter_iv(TextureVectorParameter parameter, const GLint *values);
+    /// Sets a texture parameter using glTextureParameterfv.
+    template <size_t N>
+    void parameter_fv(TextureVectorParameter        parameter,
+                      const std::array<GLfloat, N> &values) {
+        this->parameter_fv(parameter, values.data());
+    }
+    /// Sets a texture parameter using glTextureParameteriv.
+    template <size_t N>
+    void parameter_iv(TextureVectorParameter      parameter,
+                      const std::array<GLint, N> &values) {
+        this->parameter_iv(parameter, values.data());
+    }
+    /// Sets a texture parameter using glTextureParameterfv.
+    void parameter_fv(TextureVectorParameter parameter,
+                      std::convertible_to<GLfloat> auto... values) {
+        std::array<GLfloat, sizeof...(values)> values_array{values...};
+        this->parameter_fv(parameter, values_array);
+    }
+    /// Sets a texture parameter using glTextureParameteriv.
+    void parameter_iv(TextureVectorParameter parameter,
+                      std::convertible_to<GLint> auto... values) {
+        std::array<GLint, sizeof...(values)> values_array{values...};
+        this->parameter_iv(parameter, values_array);
+    }
 
     const std::optional<const void *> data() const {
         return (data_ == nullptr) ? std::nullopt : std::optional(data_);

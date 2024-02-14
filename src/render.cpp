@@ -24,7 +24,8 @@ const float vertices[] = {
     -0.5f, 0.5f,  0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, // top-left
 };
 const int indices[] = {
-    0, 1, 3, 1, 2, 3,
+    0, 1, 3, // first
+    1, 2, 3, // second
 };
 
 bool render_init(RenderVars *render_vars) {
@@ -51,6 +52,7 @@ bool render_init(RenderVars *render_vars) {
     }
 
     // generate arrays/buffers
+    // TODO: make abstractions for VAOs, VBOs, and EBOs
     glGenVertexArrays(1, &render_vars->VAO);
     glGenBuffers(1, &render_vars->VBO);
     glGenBuffers(1, &render_vars->EBO);

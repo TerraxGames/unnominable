@@ -37,6 +37,16 @@ void Texture::parameter_i(TextureParameter parameter, GLint value) {
     glTextureParameteri(this->object, parameter, value);
 }
 
+void Texture::parameter_fv(TextureVectorParameter parameter,
+                           const GLfloat         *values) {
+    glTextureParameterfv(this->object, parameter, values);
+}
+
+void Texture::parameter_iv(TextureVectorParameter parameter,
+                           const GLint           *values) {
+    glTextureParameteriv(this->object, parameter, values);
+}
+
 Texture2D::Texture2D(TextureType type) : Texture(type) {}
 
 void Texture2D::upload(TextureDataType data_type) {
