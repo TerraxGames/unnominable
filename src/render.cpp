@@ -104,6 +104,7 @@ bool render_init(RenderVars *render_vars) {
     texture1->default_parameters();
     texture1->upload();
     texture1->generate_mipmap();
+    texture1->free_surface();
     render_vars->texture1 = std::move(texture1);
 
     return true;
