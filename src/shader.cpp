@@ -1,7 +1,9 @@
 #include "shader.hpp"
-#include <cstdarg>
+#include "util.hpp"
+#include <algorithm> // IWYU pragma: keep  //required for bits/ranges_algo.h
+#include <bits/ranges_algo.h>
 #include <fstream>
-#include <initializer_list>
+#include <functional>
 #include <map>
 #include <ranges>
 #include <sstream>
@@ -13,12 +15,11 @@
 
 Shader::Shader() {
     this->shader_objects = std::map<ShaderType, GLuint>();
-    this->shader_paths   = std::map<ShaderType, std::vector<const char *>>();
+    this->shader_paths   = std::map<ShaderType, std::vector<std::string>>();
 }
 
 void Shader::add_shader_path(
-    ShaderType                       shader_type,
-    std::vector<const char *> const &file_paths_vector) {
+    ShaderType shader_type, std::vector<std::string> const &file_paths_vector) {
     this->shader_paths.emplace(shader_type, file_paths_vector);
 }
 
@@ -69,8 +70,9 @@ void Shader::set_uniform_float(const std::string &name, GLfloat value) {
 }
 
 bool Shader::compile_shader_pipe(ShaderType shader_type) {
-    const auto &shader_paths = this->shader_paths.at(shader_type);
-    std::string shader_strs[shader_paths.size()];
+    const std::vector<std::string> &shader_paths =
+        this->shader_paths.at(shader_type);
+    std::string shader_strs[shader_paths.size()]; // todo: use std::array
 
     for (int i = 0; i < shader_paths.size(); i++) {
         std::string file_path;
@@ -91,14 +93,23 @@ bool Shader::compile_shader_pipe(ShaderType shader_type) {
         shader_strs[i] = shader_str;
     }
 
-    const GLchar *shader_srcs[shader_paths.size()];
+    const GLchar *shader_srcs[shader_paths.size()]; // todo: use std::array
     for (int i = 0; i < shader_paths.size(); i++) {
         std::string *shader_str = &shader_strs[i];
         shader_srcs[i]          = shader_str->c_str();
     }
 
-    this->shader_objects.emplace(shader_type, glCreateShader(shader_type));
-    const GLuint &shader_object = this->shader_objects.at(shader_type);
+    GLuint shader_object = glCreateShader(std::to_underlying(shader_type));
+    this->shader_objects.emplace(shader_type, shader_object);
+
+    // set label
+    const std::string delim = ", ";
+    const auto        label =
+        std::ranges::fold_left(shader_paths | std::views::join_with(delim),
+                               std::string{}, std::plus<>{});
+    gl::object_label(gl::ObjectType::SHADER, shader_object, label);
+
+    // compile shader
     glShaderSource(shader_object, shader_paths.size(), shader_srcs, NULL);
     glCompileShader(shader_object);
 

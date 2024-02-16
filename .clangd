@@ -1,3 +1,7 @@
 If:
     PathMatch: .*\.(h|hpp|c|cpp)
-    PathExclude: .*lib/.*
+Index:
+    Background: Build
+    StandardLibrary: Yes
+Diagnostics:
+    UnusedIncludes: Strict

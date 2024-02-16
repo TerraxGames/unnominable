@@ -1,10 +1,13 @@
 #include "main.hpp"
 #include "log.hpp"
+#include "termstylist.h"
 #include <cstdlib>
+#include <exception>
 #include <iostream>
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_log.h>
+#include <SDL_video.h>
 
 int main() {
     // set up logging
@@ -12,6 +15,12 @@ int main() {
     UN_LogSetOptions(log_options);
     SDL_LogSetAllPriority(UN_LOG_PRIORITY);
     SDL_LogSetPriority(SDL_LOG_CATEGORY_ERROR, SDL_LOG_PRIORITY_INFO);
+    SDL_LogSetPriority(UN_LOG_CATEGORY_OPENGL, static_cast<SDL_LogPriority>(0));
+
+#ifndef NDEBUG
+    // clear the console for convenience
+    std::cout << termstylist::ATTRS_Clear;
+#endif
 
     auto render_vars = RenderVars{};
 
@@ -37,6 +46,10 @@ int main() {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
                         SDL_GL_CONTEXT_PROFILE_CORE);
+#ifndef NDEBUG
+    // enable debugging if we're in debug
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+#endif
 
     // don't disable compositing
     // todo: add option in settings to disable the compositor
@@ -72,26 +85,35 @@ int main() {
     // Enable VSync
     SDL_GL_SetSwapInterval(-1);
 
-    // Initialize OpenGL
-    if (render_init(&render_vars)) {
-        SDL_Event event;
+    try {
+        // Initialize OpenGL
+        if (render_init(&render_vars)) {
+            SDL_Event event;
 
-        while (!render_vars.should_quit) {
-            while (SDL_PollEvent(&event)) {
-                handle_SDL_event(&event, &render_vars);
+            while (!render_vars.should_quit) {
+                while (SDL_PollEvent(&event)) {
+                    handle_SDL_event(&event, &render_vars);
+                }
+
+                render(&render_vars);
+
+                // Swap framebuffer
+                SDL_GL_SwapWindow(window);
             }
 
-            render(&render_vars);
-
-            // Swap framebuffer
-            SDL_GL_SwapWindow(window);
+            render_quit();
         }
-
-        render_quit();
+    } catch (std::exception &e) {
+        if (strlen(e.what()) > 0) {
+            SDL_LogCritical(SDL_LOG_CATEGORY_ERROR, "%s", e.what());
+        }
+        SDL_LogCritical(SDL_LOG_CATEGORY_ERROR,
+                        "Unhandled exception! Quitting now.");
+        pre_exit(gl_context, window);
+        return EXIT_FAILURE;
     }
 
-    SDL_GL_DeleteContext(gl_context);
-    SDL_DestroyWindow(window);
+    pre_exit(gl_context, window);
 
     return EXIT_SUCCESS;
 }
@@ -99,6 +121,12 @@ int main() {
 void exit() {
     IMG_Quit();
     SDL_Quit();
+}
+
+/// Miscellaneous cleanup code called pre-exit.
+void pre_exit(SDL_GLContext &gl_context, SDL_Window *&window) {
+    SDL_GL_DeleteContext(gl_context);
+    SDL_DestroyWindow(window);
 }
 
 void handle_SDL_event(SDL_Event *event, RenderVars *render_vars) {

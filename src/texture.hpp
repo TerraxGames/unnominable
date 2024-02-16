@@ -3,10 +3,8 @@
 #include <exception>
 #include <format>
 #include <glad/gl.h>
-#include <memory>
 #include <optional>
 #include <string>
-#include <vector>
 #include <SDL.h>
 #include <SDL_pixels.h>
 #include <SDL_surface.h>
@@ -33,7 +31,7 @@ public:
     virtual const char *what() const throw() { return this->message.c_str(); }
 };
 
-enum class TextureFormat {
+enum class TextureFormat : GLenum {
     RED             = GL_RED,
     RG              = GL_RG,
     RGB             = GL_RGB,
@@ -44,7 +42,7 @@ enum class TextureFormat {
     DEPTH_STENCIL   = GL_DEPTH_STENCIL
 };
 
-enum class TextureType {
+enum class TextureType : GLenum {
     TEX1D                   = GL_TEXTURE_1D,
     TEX2D                   = GL_TEXTURE_2D,
     TEX3D                   = GL_TEXTURE_3D,
@@ -58,7 +56,7 @@ enum class TextureType {
     TEX2D_MULTISAMPLE_ARRAY = GL_TEXTURE_2D_MULTISAMPLE_ARRAY
 };
 
-enum class TextureUnit {
+enum class TextureUnit : GLenum {
     U0  = GL_TEXTURE0,
     U1  = GL_TEXTURE1,
     U2  = GL_TEXTURE2,
@@ -93,7 +91,7 @@ enum class TextureUnit {
     U31 = GL_TEXTURE31,
 };
 
-enum class TextureParameter {
+enum class TextureParameter : GLenum {
     DEPTH_STENCIL_TEXTURE_MODE = GL_DEPTH_STENCIL_TEXTURE_MODE,
     BASE_LEVEL                 = GL_TEXTURE_BASE_LEVEL,
     COMPARE_FUNC               = GL_TEXTURE_COMPARE_FUNC,
@@ -113,12 +111,12 @@ enum class TextureParameter {
     WRAP_R                     = GL_TEXTURE_WRAP_R,
 };
 
-enum class TextureVectorParameter {
+enum class TextureVectorParameter : GLenum {
     BORDER_COLOR = GL_TEXTURE_BORDER_COLOR,
     SWIZZLE_RGBA = GL_TEXTURE_SWIZZLE_RGBA,
 };
 
-enum class TextureDataType {
+enum class TextureDataType : GLenum {
     UNSIGNED_BYTE               = GL_UNSIGNED_BYTE,
     BYTE                        = GL_BYTE,
     UNSIGNED_SHORT              = GL_UNSIGNED_SHORT,
@@ -145,16 +143,19 @@ private:
     const void *data_;
     TextureType type_;
 
+    /// Sets a texture parameter using glTextureParameterfv.
+    void parameter_fv(TextureVectorParameter parameter, const GLfloat *values);
+    /// Sets a texture parameter using glTextureParameteriv.
+    void parameter_iv(TextureVectorParameter parameter, const GLint *values);
+
 public:
     GLuint        object;
     TextureFormat format;
 
     Texture(TextureType type);
-    Texture() { data_ = nullptr; }
 
     /// Generates the texture using glGenTextures.
     void generate();
-
     /// Binds the texture using glBindTexture.
     void bind();
     /// Generates the texture and then binds it.
@@ -163,6 +164,7 @@ public:
     /// texture using glBindTexture.
     void bind_active(TextureUnit texture_unit);
 
+    // TODO: make this into a varargs and automatically pick the right gl call
     /// Upload two-dimensional texture data.
     void upload_2d(GLsizei width, GLsizei height, TextureDataType data_type);
 
@@ -173,10 +175,6 @@ public:
     void parameter_f(TextureParameter parameter, GLfloat value);
     /// Sets a texture parameter using glTextureParameteri.
     void parameter_i(TextureParameter parameter, GLint value);
-    /// Sets a texture parameter using glTextureParameterfv.
-    void parameter_fv(TextureVectorParameter parameter, const GLfloat *values);
-    /// Sets a texture parameter using glTextureParameteriv.
-    void parameter_iv(TextureVectorParameter parameter, const GLint *values);
     /// Sets a texture parameter using glTextureParameterfv.
     template <size_t N>
     void parameter_fv(TextureVectorParameter        parameter,
@@ -207,7 +205,7 @@ public:
     }
     void data(const void *data) { data_ = std::move(data); }
 
-    const TextureType type() const { return type_; }
+    const TextureType &type() const { return type_; }
 };
 
 /// A two-dimensional texture.
@@ -217,7 +215,6 @@ private:
 
 public:
     Texture2D(TextureType type);
-    Texture2D() : Texture() {}
 
     /// Upload two-dimensional texture data.
     void upload(TextureDataType data_type);
@@ -237,7 +234,6 @@ private:
 
 public:
     ImageTexture(const std::string &path);
-    ImageTexture() : Texture2D() {}
     ~ImageTexture();
 
     /// Vertically flip the texture.

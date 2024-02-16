@@ -3,8 +3,12 @@
 #include "render.hpp"
 #include <glad/gl.h>
 #include <SDL.h>
+#include <SDL_video.h>
 
 void exit();
+
+/// Miscellaneous cleanup code called pre-exit.
+void pre_exit(SDL_GLContext &gl_context, SDL_Window *&window);
 
 void handle_SDL_event(SDL_Event *event, RenderVars *render_vars);
 

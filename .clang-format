@@ -1,6 +1,8 @@
 UseTab: Never
 TabWidth: 4
 IndentWidth: 4
+IndentCaseLabels: false
+NamespaceIndentation: None
 BinPackArguments: true
 BinPackParameters: true
 ColumnLimit: 80
@@ -8,7 +10,6 @@ AllowShortBlocksOnASingleLine: Empty
 AllowShortFunctionsOnASingleLine: All
 AllowShortEnumsOnASingleLine: false
 AllowShortLambdasOnASingleLine: Inline
-AlignAfterOpenBracket: Align
 PackConstructorInitializers: NextLine
 AccessModifierOffset: -4
 IncludeCategories:
@@ -16,6 +17,7 @@ IncludeCategories:
     Priority: 1
   - Regex: '<SDL([a-zA-Z0-9_-]+)*\.h>'
     Priority: 2
+AlignAfterOpenBracket: Align
 AlignConsecutiveDeclarations:
   Enabled: true
   AcrossEmptyLines: false

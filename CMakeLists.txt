@@ -1,21 +1,27 @@
 cmake_minimum_required(VERSION 3.28.0)
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
+
+add_compile_options(-Wall)
 
 project(unnominable
         VERSION 0.1.0.0)
 add_executable(${PROJECT_NAME}
+        src/log.cpp
+        src/log.hpp
         src/main.cpp
         src/main.hpp
+        src/objects.cpp
+        src/objects.hpp
         src/render.cpp
         src/render.hpp
         src/shader.cpp
         src/shader.hpp
         src/texture.cpp
         src/texture.hpp
-        src/log.cpp
-        src/log.hpp
+        src/types.cpp
+        src/types.hpp
         src/util.cpp
         src/util.hpp)
 
