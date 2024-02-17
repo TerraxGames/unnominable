@@ -39,7 +39,7 @@ bool render_init(RenderVars *render_vars) {
 #ifndef NDEBUG
     if (GLAD_GL_KHR_debug) {
         GLint flags;
-        glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+        gl::get_integerv(gl::Variable::CONTEXT_FLAGS, &flags);
 
         if (!(flags & GL_CONTEXT_FLAG_DEBUG_BIT)) {
             SDL_LogDebug(UN_LOG_CATEGORY_OPENGL,
@@ -62,13 +62,13 @@ bool render_init(RenderVars *render_vars) {
     SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "OpenGL version %d.%d",
                 GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
 
-    glViewport(0, 0, render_vars->window_width, render_vars->window_height);
+    gl::viewport(0, 0, render_vars->window_width, render_vars->window_height);
 
-    glClearColor(0.3f, 0.1f, 0.3f, 1.0f);
+    gl::clear_color(0.3f, 0.1f, 0.3f, 1.0f);
 
     render_vars->shader = Shader();
-    render_vars->shader.add_shader_path(ShaderType::VERTEX, "vertex.glsl");
-    render_vars->shader.add_shader_path(ShaderType::FRAGMENT, "fragment.glsl");
+    render_vars->shader.add_shader_path(ShaderType::VERTEX, "shader.vert");
+    render_vars->shader.add_shader_path(ShaderType::FRAGMENT, "shader.frag");
     if (!render_vars->shader.compile_and_link()) {
         return false; // todo: use exceptions
     }
@@ -128,8 +128,8 @@ void render(RenderVars *render_vars) {
     glClear(GL_COLOR_BUFFER_BIT);
 
     render_vars->shader.use();
-    render_vars->shader.set_uniform_int("texture0", 0);
-    render_vars->shader.set_uniform_int("texture1", 1);
+    render_vars->shader.set_uniform_int("u_texture0", 0);
+    render_vars->shader.set_uniform_int("u_texture1", 1);
 
     render_vars->texture0->bind_active(TextureUnit::U0);
     render_vars->texture1->bind_active(TextureUnit::U1);
