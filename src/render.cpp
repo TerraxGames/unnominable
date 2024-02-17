@@ -101,42 +101,6 @@ bool render_init(RenderVars *render_vars) {
     render_vars->VBO = std::move(VBO);
     render_vars->EBO = std::move(EBO);
 
-    // generate arrays/buffers
-    // TODO: make abstractions for VAOs, VBOs, and EBOs
-    // glGenVertexArrays(1, &render_vars->VAO);
-    // glGenBuffers(1, &render_vars->VBO);
-    // glGenBuffers(1, &render_vars->EBO);
-
-    // // bind VAO
-    // glBindVertexArray(render_vars->VAO);
-
-    // // bind VBO
-    // glBindBuffer(GL_ARRAY_BUFFER, render_vars->VBO);
-    // glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices,
-    // GL_STATIC_DRAW);
-
-    // // bind EBO
-    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, render_vars->EBO);
-    // glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices,
-    //              GL_STATIC_DRAW);
-
-    // // set vertex attribute pointers
-    // std::size_t stride = 8 * sizeof(float);
-    // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void *)0); //
-    // a_pos glEnableVertexAttribArray(0); glVertexAttribPointer(
-    //     1, 3, GL_FLOAT, GL_FALSE, stride,
-    //     reinterpret_cast<void *>(3 * sizeof(float))); // a_color
-    // glEnableVertexAttribArray(1);
-    // glVertexAttribPointer(
-    //     2, 2, GL_FLOAT, GL_FALSE, stride,
-    //     reinterpret_cast<void *>(6 * sizeof(float))); // a_texcoord
-    // glEnableVertexAttribArray(2);
-
-    // // unbind everything
-    // glBindBuffer(GL_ARRAY_BUFFER, 0);
-    // glBindVertexArray(
-    //     0); // so we don't modify this VAO by accident; for cleanness' sake
-
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     // load first texture
