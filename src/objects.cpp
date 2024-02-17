@@ -33,17 +33,11 @@ void VertexArrayObject::init_vbo(size_t row_size, GLtype type) {
 }
 
 void VertexArrayObject::attrib_pointer_f(GLint size, bool normalized) {
-    const void *offset = reinterpret_cast<const void *>(
-        this->total_attrib_size * util::sizeof_gltype(this->type));
-    glVertexAttribPointer(this->current_index, size,
-                          std::to_underlying(this->type), normalized,
-                          this->stride, offset);
+    size_t offset = this->total_attrib_size * util::sizeof_gltype(this->type);
+    gl::vertex_attrib_pointer(this->current_index, size, this->type, normalized,
+                              this->stride, offset);
     this->total_attrib_size += size;
     this->current_index++;
-}
-
-void VertexArrayObject::enable_attrib_array(GLuint index) {
-    glEnableVertexAttribArray(index);
 }
 
 void VertexArrayObject::enable_attrib_array() {

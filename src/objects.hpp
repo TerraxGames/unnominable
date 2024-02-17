@@ -2,10 +2,9 @@
 #define UNNOMINABLE_OBJECTS_HPP_
 #include "glad/gl.h"
 #include "types.hpp"
+#include "util.hpp"
 #include <array>
 #include <cstddef>
-
-typedef GLuint GLobject;
 
 /// The buffer target.
 /// Quoth the wiki,
@@ -95,14 +94,16 @@ public:
     /// Bind the VAO using glBindVertexArray.
     void bind();
 
-    /// Sets the current VBO's type.
+    /// Sets the current VBO's type and row size.
     void init_vbo(size_t row_size, GLtype type);
 
     /// Define an attribute pointer using glVertexAttribPointer.
     void attrib_pointer_f(GLint size, bool normalized);
 
     /// Enable vertex attribute array access using glEnableVertexAttribArray.
-    void enable_attrib_array(GLuint index);
+    static inline void enable_attrib_array(GLuint index) {
+        gl::enable_vertex_attrib_array(index);
+    }
     /// Enable vertex attribute array access using glEnableVertexAttribArray.
     void enable_attrib_array();
 };

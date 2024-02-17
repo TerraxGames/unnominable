@@ -2,6 +2,8 @@
 #define UNNOMINABLE_TYPES_HPP_
 #include <glad/gl.h>
 
+typedef GLuint GLobject;
+
 /// All numerical types in OpenGL.
 enum class GLtype : GLenum {
     BYTE                         = GL_BYTE,

@@ -1,7 +1,6 @@
 #ifndef UNNOMINABLE_UTIL_HPP_
 #define UNNOMINABLE_UTIL_HPP_
 
-#include "objects.hpp"
 #include "types.hpp"
 #include <cstddef>
 #include <string>
@@ -15,6 +14,10 @@ constexpr GLtype from_gltype_int(GLtype_int type) {
 
 /// Calculates the size of a GLtype.
 size_t sizeof_gltype(GLtype type);
+
+inline const void *offset_to_ptr(size_t offset) {
+    return reinterpret_cast<const void *>(offset);
+}
 
 } // namespace util
 
@@ -328,6 +331,24 @@ inline void get_integerv(Variable variable, GLint *data) {
 
 inline void get_integer64v(Variable variable, GLint64 *data) {
     glGetInteger64v(std::to_underlying(variable), data);
+}
+
+inline void vertex_attrib_pointer(GLuint index, GLint size, GLtype type,
+                                  bool normalized, GLsizei stride,
+                                  const GLvoid *pointer) {
+    glVertexAttribPointer(index, size, std::to_underlying(type), normalized,
+                          stride, pointer);
+}
+
+inline void vertex_attrib_pointer(GLuint index, GLint size, GLtype type,
+                                  bool normalized, GLsizei stride,
+                                  size_t offset) {
+    glVertexAttribPointer(index, size, std::to_underlying(type), normalized,
+                          stride, util::offset_to_ptr(offset));
+}
+
+inline void enable_vertex_attrib_array(GLuint index) {
+    glEnableVertexAttribArray(index);
 }
 
 } // namespace gl
