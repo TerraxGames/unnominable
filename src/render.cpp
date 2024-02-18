@@ -47,8 +47,8 @@ bool render_init(RenderVars *render_vars) {
                          "glGetError().");
         }
 
-        glEnable(GL_DEBUG_OUTPUT);
-        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        gl::enable(gl::Capability::DEBUG_OUTPUT);
+        gl::enable(gl::Capability::DEBUG_OUTPUT_SYNCHRONOUS);
         glDebugMessageCallback(UN_glDebugMessage, nullptr);
         glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0,
                               nullptr, GL_TRUE);
@@ -125,7 +125,7 @@ bool render_init(RenderVars *render_vars) {
 }
 
 void render(RenderVars *render_vars) {
-    glClear(GL_COLOR_BUFFER_BIT);
+    gl::clear(gl::BufferBit::COLOR);
 
     render_vars->shader.use();
     render_vars->shader.set_uniform_int("u_texture0", 0);

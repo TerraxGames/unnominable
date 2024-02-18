@@ -24,6 +24,8 @@ inline const void *offset_to_ptr(size_t offset) {
 /// some wrappers for OpenGL :3
 namespace gl {
 
+// Debug
+
 enum class ObjectType : GLenum {
     BUFFER             = GL_BUFFER,
     SHADER             = GL_SHADER,
@@ -37,6 +39,18 @@ enum class ObjectType : GLenum {
     RENDERBUFFER       = GL_RENDERBUFFER,
     FRAMEBUFFER        = GL_FRAMEBUFFER,
 };
+
+inline void object_label(ObjectType identifier, GLobject object_name,
+                         GLsizei length, const char *label) {
+    glObjectLabel(std::to_underlying(identifier), object_name, length, label);
+}
+
+inline void object_label(ObjectType identifier, GLobject object_name,
+                         const std::string &label) {
+    object_label(identifier, object_name, label.size(), label.c_str());
+}
+
+// Buffer Objects
 
 enum class DrawMode : GLenum {
     POINTS                   = GL_POINTS,
@@ -53,7 +67,47 @@ enum class DrawMode : GLenum {
     PATCHES                  = GL_PATCHES,
 };
 
-enum class Variable {
+inline void draw_elements(DrawMode mode, GLsizei count, GLtype type,
+                          const GLvoid *indices) {
+    glDrawElements(std::to_underlying(mode), count, std::to_underlying(type),
+                   indices);
+}
+
+inline void vertex_attrib_pointer(GLuint index, GLint size, GLtype type,
+                                  bool normalized, GLsizei stride,
+                                  const GLvoid *pointer) {
+    glVertexAttribPointer(index, size, std::to_underlying(type), normalized,
+                          stride, pointer);
+}
+
+inline void vertex_attrib_pointer(GLuint index, GLint size, GLtype type,
+                                  bool normalized, GLsizei stride,
+                                  size_t offset) {
+    glVertexAttribPointer(index, size, std::to_underlying(type), normalized,
+                          stride, util::offset_to_ptr(offset));
+}
+
+inline void enable_vertex_attrib_array(GLuint index) {
+    glEnableVertexAttribArray(index);
+}
+
+// Rendering
+
+enum class BufferBit : GLbitfield {
+    COLOR   = GL_COLOR_BUFFER_BIT,
+    DEPTH   = GL_DEPTH_BUFFER_BIT,
+    STENCIL = GL_STENCIL_BUFFER_BIT,
+};
+
+inline void clear(BufferBit mask) { glClear(std::to_underlying(mask)); }
+
+inline void clear_color(GLfloat r, GLfloat g, GLfloat b, GLfloat a) {
+    glClearColor(r, g, b, a);
+}
+
+// State Management
+
+enum class Variable : GLenum {
     ACTIVE_TEXTURE                     = GL_ACTIVE_TEXTURE,
     ALIASED_LINE_WIDTH_RANGE           = GL_ALIASED_LINE_WIDTH_RANGE,
     ARRAY_BUFFER_BINDING               = GL_ARRAY_BUFFER_BINDING,
@@ -289,28 +343,58 @@ enum class Variable {
     MAX_ELEMENT_INDEX                 = GL_MAX_ELEMENT_INDEX,
 };
 
-inline void object_label(ObjectType identifier, GLobject object_name,
-                         GLsizei length, const char *label) {
-    glObjectLabel(std::to_underlying(identifier), object_name, length, label);
+enum class Capability : GLenum {
+    BLEND                         = GL_BLEND,
+    CLIP_DISTANCE0                = GL_CLIP_DISTANCE0,
+    CLIP_DISTANCE1                = GL_CLIP_DISTANCE1,
+    CLIP_DISTANCE2                = GL_CLIP_DISTANCE2,
+    CLIP_DISTANCE3                = GL_CLIP_DISTANCE3,
+    CLIP_DISTANCE4                = GL_CLIP_DISTANCE4,
+    CLIP_DISTANCE5                = GL_CLIP_DISTANCE5,
+    CLIP_DISTANCE6                = GL_CLIP_DISTANCE6,
+    CLIP_DISTANCE7                = GL_CLIP_DISTANCE7,
+    COLOR_LOGIC_OP                = GL_COLOR_LOGIC_OP,
+    CULL_FACE                     = GL_CULL_FACE,
+    DEBUG_OUTPUT                  = GL_DEBUG_OUTPUT,
+    DEBUG_OUTPUT_SYNCHRONOUS      = GL_DEBUG_OUTPUT_SYNCHRONOUS,
+    DEPTH_CLAMP                   = GL_DEPTH_CLAMP,
+    DEPTH_TEST                    = GL_DEPTH_TEST,
+    DITHER                        = GL_DITHER,
+    FRAMEBUFFER_SRGB              = GL_FRAMEBUFFER_SRGB,
+    LINE_SMOOTH                   = GL_LINE_SMOOTH,
+    MULTISAMPLE                   = GL_MULTISAMPLE,
+    POLYGON_OFFSET_FILL           = GL_POLYGON_OFFSET_FILL,
+    POLYGON_OFFSET_LINE           = GL_POLYGON_OFFSET_LINE,
+    POLYGON_OFFSET_POINT          = GL_POLYGON_OFFSET_POINT,
+    POLYGON_SMOOTH                = GL_POLYGON_SMOOTH,
+    PRIMITIVE_RESTART             = GL_PRIMITIVE_RESTART,
+    PRIMITIVE_RESTART_FIXED_INDEX = GL_PRIMITIVE_RESTART_FIXED_INDEX,
+    RASTERIZER_DISCARD            = GL_RASTERIZER_DISCARD,
+    SAMPLE_ALPHA_TO_COVERAGE      = GL_SAMPLE_ALPHA_TO_COVERAGE,
+    SAMPLE_ALPHA_TO_ONE           = GL_SAMPLE_ALPHA_TO_ONE,
+    SAMPLE_COVERAGE               = GL_SAMPLE_COVERAGE,
+    SAMPLE_SHADING                = GL_SAMPLE_SHADING,
+    SAMPLE_MASK                   = GL_SAMPLE_MASK,
+    SCISSOR_TEST                  = GL_SCISSOR_TEST,
+    STENCIL_TEST                  = GL_STENCIL_TEST,
+    TEXTURE_CUBE_MAP_SEAMLESS     = GL_TEXTURE_CUBE_MAP_SEAMLESS,
+    PROGRAM_POINT_SIZE            = GL_PROGRAM_POINT_SIZE,
+};
+
+inline void enable(Capability capability) {
+    glEnable(std::to_underlying(capability));
 }
 
-inline void object_label(ObjectType identifier, GLobject object_name,
-                         const std::string &label) {
-    object_label(identifier, object_name, label.size(), label.c_str());
+inline void disable(Capability capability) {
+    glDisable(std::to_underlying(capability));
 }
 
-inline void draw_elements(DrawMode mode, GLsizei count, GLtype type,
-                          const GLvoid *indices) {
-    glDrawElements(std::to_underlying(mode), count, std::to_underlying(type),
-                   indices);
+inline void enablei(Capability capability, GLuint index) {
+    glEnablei(std::to_underlying(capability), index);
 }
 
-inline void clear_color(GLfloat r, GLfloat g, GLfloat b, GLfloat a) {
-    glClearColor(r, g, b, a);
-}
-
-inline void viewport(GLint x, GLint y, GLsizei width, GLsizei height) {
-    glViewport(x, y, width, height);
+inline void disablei(Capability capability, GLuint index) {
+    glDisablei(std::to_underlying(capability), index);
 }
 
 inline void get_booleanv(Variable variable, GLboolean *data) {
@@ -333,22 +417,8 @@ inline void get_integer64v(Variable variable, GLint64 *data) {
     glGetInteger64v(std::to_underlying(variable), data);
 }
 
-inline void vertex_attrib_pointer(GLuint index, GLint size, GLtype type,
-                                  bool normalized, GLsizei stride,
-                                  const GLvoid *pointer) {
-    glVertexAttribPointer(index, size, std::to_underlying(type), normalized,
-                          stride, pointer);
-}
-
-inline void vertex_attrib_pointer(GLuint index, GLint size, GLtype type,
-                                  bool normalized, GLsizei stride,
-                                  size_t offset) {
-    glVertexAttribPointer(index, size, std::to_underlying(type), normalized,
-                          stride, util::offset_to_ptr(offset));
-}
-
-inline void enable_vertex_attrib_array(GLuint index) {
-    glEnableVertexAttribArray(index);
+inline void viewport(GLint x, GLint y, GLsizei width, GLsizei height) {
+    glViewport(x, y, width, height);
 }
 
 } // namespace gl
