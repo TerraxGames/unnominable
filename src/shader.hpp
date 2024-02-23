@@ -1,5 +1,6 @@
 #ifndef UNNOMINABLE_SHADER_HPP_
 #define UNNOMINABLE_SHADER_HPP_
+#include "math.hpp"
 #include <glad/gl.h>
 #include <map>
 #include <string>
@@ -41,9 +42,12 @@ public:
 
     void use();
 
+    GLuint get_uniform_loc(const std::string &name);
+
     void set_uniform_bool(const std::string &name, bool value);
     void set_uniform_int(const std::string &name, GLint value);
     void set_uniform_float(const std::string &name, GLfloat value);
+    void set_uniform_mat4f(const std::string &name, const glm::mat4 &value);
 };
 
 #endif // UNNOMINABLE_SHADER_HPP_

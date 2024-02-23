@@ -12,6 +12,7 @@ add_executable(${PROJECT_NAME}
         src/log.hpp
         src/main.cpp
         src/main.hpp
+        src/math.hpp
         src/objects.cpp
         src/objects.hpp
         src/render.cpp
@@ -36,5 +37,7 @@ add_library(GLAD STATIC "${CMAKE_SOURCE_DIR}/lib/glad/src/gl.c")
 include_directories("${CMAKE_SOURCE_DIR}/lib/glad/include/")
 
 include_directories("${CMAKE_SOURCE_DIR}/lib/termstylist/include/")
+
+include_directories("${CMAKE_SOURCE_DIR}/lib/include/")
 
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL2::Main SDL2::Image SDL2::GFX SDL2::TTF GLAD)

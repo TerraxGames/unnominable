@@ -1,5 +1,6 @@
 #include "render.hpp"
 #include "log.hpp"
+#include "math.hpp"
 #include "objects.hpp"
 #include "shader.hpp"
 #include "texture.hpp"
@@ -104,21 +105,21 @@ bool render_init(RenderVars *render_vars) {
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     // load first texture
-    auto texture0 = std::make_unique<ImageTexture>("textures/container.jpg");
-    texture0->bind_generate();
-    texture0->default_parameters();
-    texture0->upload();
-    texture0->generate_mipmap();
-    texture0->free_surface();
+    ImageTexture texture0("textures/container.jpg");
+    texture0.bind_generate();
+    texture0.default_parameters();
+    texture0.upload();
+    texture0.generate_mipmap();
+    texture0.free_surface();
     render_vars->texture0 = std::move(texture0);
 
     // load second texture
-    auto texture1 = std::make_unique<ImageTexture>("textures/awesomeface.png");
-    texture1->bind_generate();
-    texture1->default_parameters();
-    texture1->upload();
-    texture1->generate_mipmap();
-    texture1->free_surface();
+    ImageTexture texture1("textures/awesomeface.png");
+    texture1.bind_generate();
+    texture1.default_parameters();
+    texture1.upload();
+    texture1.generate_mipmap();
+    texture1.free_surface();
     render_vars->texture1 = std::move(texture1);
 
     return true;
@@ -131,10 +132,23 @@ void render(RenderVars *render_vars) {
     render_vars->shader.set_uniform_int("u_texture0", 0);
     render_vars->shader.set_uniform_int("u_texture1", 1);
 
-    render_vars->texture0->bind_active(TextureUnit::U0);
-    render_vars->texture1->bind_active(TextureUnit::U1);
+    render_vars->texture0.bind_active(TextureUnit::U0);
+    render_vars->texture1.bind_active(TextureUnit::U1);
+
+    glm::mat4 trans = glm::mat4(1.0f);
+    trans           = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
+    trans = glm::rotate(trans, util::get_secs(), glm::vec3(0.0f, 0.0f, 1.0f));
+    render_vars->shader.set_uniform_mat4f("u_transform", trans);
 
     render_vars->VAO->bind();
+    gl::draw_elements(gl::DrawMode::TRIANGLES, 6, GLtype::UNSIGNED_INT, 0);
+
+    glm::mat4 trans2 = glm::mat4(1.0f);
+    trans2           = glm::scale(trans2, glm::vec3(-1.0f));
+    trans2           = glm::translate(trans2, glm::vec3(0.5f, -0.5f, 0.0f));
+    trans2 = glm::scale(trans2, glm::vec3(-glm::sin(util::get_secs())));
+    render_vars->shader.set_uniform_mat4f("u_transform", trans2);
+
     gl::draw_elements(gl::DrawMode::TRIANGLES, 6, GLtype::UNSIGNED_INT, 0);
 }
 

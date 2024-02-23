@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <string>
 #include <utility>
+#include <SDL_timer.h>
 namespace util {
 
 /// Converts a GLtype_int to a GLtype.
@@ -18,6 +19,10 @@ size_t sizeof_gltype(GLtype type);
 inline const void *offset_to_ptr(size_t offset) {
     return reinterpret_cast<const void *>(offset);
 }
+
+inline float get_ms() { return static_cast<float>(SDL_GetTicks()); }
+
+inline float get_secs() { return get_ms() / 1000.0f; }
 
 } // namespace util
 

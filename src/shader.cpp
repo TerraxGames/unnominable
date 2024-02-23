@@ -54,19 +54,26 @@ bool Shader::compile_and_link() {
 
 void Shader::use() { glUseProgram(this->shader_program); }
 
+GLuint Shader::get_uniform_loc(const std::string &name) {
+    return glGetUniformLocation(this->shader_program, name.c_str());
+}
+
 void Shader::set_uniform_bool(const std::string &name, bool value) {
-    glUniform1i(glGetUniformLocation(this->shader_program, name.c_str()),
-                static_cast<int>(value));
+    glUniform1i(this->get_uniform_loc(name), static_cast<GLint>(value));
 }
 
 void Shader::set_uniform_int(const std::string &name, GLint value) {
-    glUniform1i(glGetUniformLocation(this->shader_program, name.c_str()),
-                value);
+    glUniform1i(this->get_uniform_loc(name), value);
 }
 
 void Shader::set_uniform_float(const std::string &name, GLfloat value) {
-    glUniform1f(glGetUniformLocation(this->shader_program, name.c_str()),
-                value);
+    glUniform1f(this->get_uniform_loc(name), value);
+}
+
+void Shader::set_uniform_mat4f(const std::string &name,
+                               const glm::mat4   &value) {
+    glUniformMatrix4fv(this->get_uniform_loc(name), 1, GL_FALSE,
+                       glm::value_ptr(value));
 }
 
 bool Shader::compile_shader_pipe(ShaderType shader_type) {

@@ -1,6 +1,7 @@
 #ifndef UNNOMINABLE_RENDER_HPP_
 #define UNNOMINABLE_RENDER_HPP_
 
+#include "math.hpp"
 #include "objects.hpp"
 #include "shader.hpp"
 #include "texture.hpp"
@@ -12,12 +13,13 @@ struct RenderVars {
     int                                window_height = 720;
     bool                               should_quit   = false;
     Shader                             shader;
-    std::unique_ptr<ImageTexture>      texture0;
-    std::unique_ptr<ImageTexture>      texture1;
+    ImageTexture                       texture0;
+    ImageTexture                       texture1;
     GLint                              success;
     GLchar                             info_log[512];
     std::unique_ptr<VertexArrayObject> VAO;
     std::unique_ptr<BufferObject>      VBO, EBO;
+    glm::mat4                          trans;
 };
 
 bool render_init(RenderVars *render_vars);
