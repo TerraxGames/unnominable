@@ -1,6 +1,7 @@
 #ifndef UNNOMINABLE_SHADER_HPP_
 #define UNNOMINABLE_SHADER_HPP_
-#include "math.hpp"
+#include "glm/ext/vector_float3.hpp"
+#include "math.hpp" // IWYU pragma: keep
 #include <glad/gl.h>
 #include <map>
 #include <string>
@@ -48,6 +49,7 @@ public:
     void set_uniform_int(const std::string &name, GLint value);
     void set_uniform_float(const std::string &name, GLfloat value);
     void set_uniform_mat4f(const std::string &name, const glm::mat4 &value);
+    void set_uniform_vec3f(const std::string &name, const glm::vec3 &value);
 };
 
 #endif // UNNOMINABLE_SHADER_HPP_

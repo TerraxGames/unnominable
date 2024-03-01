@@ -20,9 +20,25 @@ inline const void *offset_to_ptr(size_t offset) {
     return reinterpret_cast<const void *>(offset);
 }
 
-inline float get_ms() { return static_cast<float>(SDL_GetTicks()); }
+template <typename T>
+inline T get_ms();
 
-inline float get_secs() { return get_ms() / 1000.0f; }
+template <>
+inline float get_ms<float>() {
+    return static_cast<float>(SDL_GetTicks());
+}
+
+template <>
+inline uint32_t get_ms<uint32_t>() {
+    return SDL_GetTicks();
+}
+
+template <>
+inline uint64_t get_ms<uint64_t>() {
+    return SDL_GetTicks64();
+}
+
+inline float get_secs() { return get_ms<uint32_t>() / 1000.0f; }
 
 } // namespace util
 
@@ -72,6 +88,10 @@ enum class DrawMode : GLenum {
     PATCHES                  = GL_PATCHES,
 };
 
+inline void draw_arrays(DrawMode mode, GLint first, GLsizei count) {
+    glDrawArrays(std::to_underlying(mode), first, count);
+}
+
 inline void draw_elements(DrawMode mode, GLsizei count, GLtype type,
                           const GLvoid *indices) {
     glDrawElements(std::to_underlying(mode), count, std::to_underlying(type),
@@ -103,6 +123,10 @@ enum class BufferBit : GLbitfield {
     DEPTH   = GL_DEPTH_BUFFER_BIT,
     STENCIL = GL_STENCIL_BUFFER_BIT,
 };
+
+inline BufferBit operator|(BufferBit a, BufferBit b) {
+    return BufferBit{std::to_underlying(a) | std::to_underlying(b)};
+}
 
 inline void clear(BufferBit mask) { glClear(std::to_underlying(mask)); }
 

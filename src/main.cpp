@@ -1,12 +1,20 @@
 #include "main.hpp"
 #include "log.hpp"
+#include "math.hpp"
 #include "termstylist.h"
+#include "util.hpp"
+#include <cstdint>
 #include <cstdlib>
 #include <exception>
 #include <iostream>
 #include <SDL.h>
+#include <SDL_events.h>
 #include <SDL_image.h>
+#include <SDL_keyboard.h>
+#include <SDL_keycode.h>
 #include <SDL_log.h>
+#include <SDL_scancode.h>
+#include <SDL_stdinc.h>
 #include <SDL_video.h>
 
 int main() {
@@ -85,17 +93,27 @@ int main() {
     // Enable VSync
     SDL_GL_SetSwapInterval(-1);
 
+    SDL_SetRelativeMouseMode(SDL_TRUE);
+
+    uint64_t last_frame = util::get_ms<uint64_t>();
+
     try {
         // Initialize OpenGL
         if (render_init(&render_vars)) {
             SDL_Event event;
 
             while (!render_vars.should_quit) {
-                while (SDL_PollEvent(&event)) {
-                    handle_SDL_event(&event, &render_vars);
-                }
+                uint64_t current_frame = util::get_ms<uint64_t>();
+                uint64_t delta_time    = current_frame - last_frame;
 
-                render(&render_vars);
+                while (SDL_PollEvent(&event)) {
+                    handle_SDL_event(event, render_vars);
+                }
+                handle_keypress(render_vars, delta_time);
+
+                render(&render_vars, delta_time);
+
+                last_frame = current_frame;
 
                 // Swap framebuffer
                 SDL_GL_SwapWindow(window);
@@ -129,27 +147,79 @@ void pre_exit(SDL_GLContext &gl_context, SDL_Window *&window) {
     SDL_DestroyWindow(window);
 }
 
-void handle_SDL_event(SDL_Event *event, RenderVars *render_vars) {
-    if (event->type == SDL_QUIT) {
-        render_vars->should_quit = true;
-    } else if (event->type == SDL_KEYDOWN) {
-        switch (event->key.keysym.sym) {
+void handle_SDL_event(SDL_Event &event, RenderVars &render_vars) {
+    if (event.type == SDL_QUIT) {
+        render_vars.should_quit = true;
+    }
+
+    if (event.type == SDL_KEYDOWN) {
+        switch (event.key.keysym.sym) {
         case SDLK_ESCAPE:
-            render_vars->should_quit = true;
+            render_vars.should_quit = true;
             break;
         }
     }
 
-    if (event->type == SDL_WINDOWEVENT) {
-        switch (event->window.event) {
+    if (event.type == SDL_WINDOWEVENT) {
+        switch (event.window.event) {
         case SDL_WINDOWEVENT_SIZE_CHANGED:
-            int window_width  = event->window.data1;
-            int window_height = event->window.data2;
+            int window_width  = event.window.data1;
+            int window_height = event.window.data2;
             glViewport(0, 0, window_width, window_height);
 
-            render_vars->window_width  = window_width;
-            render_vars->window_height = window_height;
+            render_vars.window_width  = window_width;
+            render_vars.window_height = window_height;
             break;
         }
     }
+
+    if (event.type == SDL_MOUSEMOTION) {
+        handle_mouse_motion(event.motion, render_vars);
+    }
+}
+
+void handle_keypress(RenderVars &render_vars, uint64_t delta_time) {
+    const uint8_t *state        = SDL_GetKeyboardState(nullptr);
+    float          camera_speed = render_vars.camera_speed * delta_time;
+
+    if (state[SDL_SCANCODE_W]) {
+        render_vars.camera->position -=
+            camera_speed * render_vars.camera->forward();
+    }
+    if (state[SDL_SCANCODE_A]) {
+        render_vars.camera->position -=
+            camera_speed * render_vars.camera->right();
+    }
+    if (state[SDL_SCANCODE_S]) {
+        render_vars.camera->position +=
+            camera_speed * render_vars.camera->forward();
+    }
+    if (state[SDL_SCANCODE_D]) {
+        render_vars.camera->position +=
+            camera_speed * render_vars.camera->right();
+    }
+    if (state[SDL_SCANCODE_SPACE]) {
+        render_vars.camera->position += camera_speed * render_vars.camera->up();
+    }
+    if (state[SDL_SCANCODE_LSHIFT]) {
+        render_vars.camera->position -= camera_speed * render_vars.camera->up();
+    }
+}
+
+void handle_mouse_motion(SDL_MouseMotionEvent &event, RenderVars &render_vars) {
+    // https://gamedev.stackexchange.com/a/30654/178226
+    // special thanks to ltjax on Gamedev Stack Exchange for solving this
+    // problem!
+    float x_movement   = event.xrel * render_vars.camera->sensitivity;
+    float y_movement   = event.yrel * render_vars.camera->sensitivity;
+    float pitch        = glm::degrees(glm::pitch(render_vars.camera->rotation));
+    float pitch_result = pitch + y_movement;
+    if (pitch_result < 90.0f && pitch_result > -90.0f) {
+        render_vars.camera->rotation =
+            glm::angleAxis(glm::radians(y_movement), math::Direction::EAST) *
+            render_vars.camera->rotation;
+    }
+    render_vars.camera->rotation =
+        render_vars.camera->rotation *
+        glm::angleAxis(glm::radians(x_movement), math::Direction::UP);
 }

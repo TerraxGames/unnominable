@@ -3,6 +3,7 @@
 #include "render.hpp"
 #include <glad/gl.h>
 #include <SDL.h>
+#include <SDL_events.h>
 #include <SDL_video.h>
 
 void exit();
@@ -10,6 +11,10 @@ void exit();
 /// Miscellaneous cleanup code called pre-exit.
 void pre_exit(SDL_GLContext &gl_context, SDL_Window *&window);
 
-void handle_SDL_event(SDL_Event *event, RenderVars *render_vars);
+void handle_SDL_event(SDL_Event &event, RenderVars &render_vars);
+
+void handle_keypress(RenderVars &render_vars, uint64_t delta_time);
+
+void handle_mouse_motion(SDL_MouseMotionEvent &event, RenderVars &render_vars);
 
 #endif // UNNOMINABLE_MAIN_HPP_

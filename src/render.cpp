@@ -1,12 +1,14 @@
 #include "render.hpp"
 #include "log.hpp"
-#include "math.hpp"
 #include "objects.hpp"
 #include "shader.hpp"
 #include "texture.hpp"
 #include "types.hpp"
 #include "util.hpp"
+#include "world/camera.hpp"
+#include "world/world.hpp"
 #include <glad/gl.h>
+#include <memory>
 #include <utility>
 #include <SDL.h>
 #include <SDL_error.h>
@@ -16,16 +18,61 @@
 #include <SDL_surface.h>
 #include <SDL_timer.h>
 
-const std::array<GLfloat, 8 * 4> vertices = {
-    // position         // color          // tex-coords
-    0.5f,  0.5f,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top-right
-    0.5f,  -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom-right
-    -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom-left
-    -0.5f, 0.5f,  0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, // top-left
+const std::array<GLfloat, 36 * 5> vertices = {
+    -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, //
+    0.5f,  -0.5f, -0.5f, 1.0f, 0.0f, //
+    0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, //
+    0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, //
+    -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, //
+    -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, //
+
+    -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, //
+    0.5f,  -0.5f, 0.5f,  1.0f, 0.0f, //
+    0.5f,  0.5f,  0.5f,  1.0f, 1.0f, //
+    0.5f,  0.5f,  0.5f,  1.0f, 1.0f, //
+    -0.5f, 0.5f,  0.5f,  0.0f, 1.0f, //
+    -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, //
+
+    -0.5f, 0.5f,  0.5f,  1.0f, 0.0f, //
+    -0.5f, 0.5f,  -0.5f, 1.0f, 1.0f, //
+    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, //
+    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, //
+    -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, //
+    -0.5f, 0.5f,  0.5f,  1.0f, 0.0f, //
+
+    0.5f,  0.5f,  0.5f,  1.0f, 0.0f, //
+    0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, //
+    0.5f,  -0.5f, -0.5f, 0.0f, 1.0f, //
+    0.5f,  -0.5f, -0.5f, 0.0f, 1.0f, //
+    0.5f,  -0.5f, 0.5f,  0.0f, 0.0f, //
+    0.5f,  0.5f,  0.5f,  1.0f, 0.0f, //
+
+    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, //
+    0.5f,  -0.5f, -0.5f, 1.0f, 1.0f, //
+    0.5f,  -0.5f, 0.5f,  1.0f, 0.0f, //
+    0.5f,  -0.5f, 0.5f,  1.0f, 0.0f, //
+    -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, //
+    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, //
+
+    -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, //
+    0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, //
+    0.5f,  0.5f,  0.5f,  1.0f, 0.0f, //
+    0.5f,  0.5f,  0.5f,  1.0f, 0.0f, //
+    -0.5f, 0.5f,  0.5f,  0.0f, 0.0f, //
+    -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, //
 };
-const std::array<GLuint, 6> indices = {
-    0, 1, 3, // first
-    1, 2, 3, // second
+
+glm::vec3 cube_positions[] = {
+    glm::vec3(0.0f, 0.0f, 0.0f),     //
+    glm::vec3(2.0f, 5.0f, -15.0f),   //
+    glm::vec3(-1.5f, -2.2f, -2.5f),  //
+    glm::vec3(-3.8f, -2.0f, -12.3f), //
+    glm::vec3(2.4f, -0.4f, -3.5f),   //
+    glm::vec3(-1.7f, 3.0f, -7.5f),   //
+    glm::vec3(1.3f, -2.0f, -2.5f),   //
+    glm::vec3(1.5f, 2.0f, -2.5f),    //
+    glm::vec3(1.5f, 0.2f, -1.5f),    //
+    glm::vec3(-1.3f, 1.0f, -1.5f),   //
 };
 
 bool render_init(RenderVars *render_vars) {
@@ -36,6 +83,9 @@ bool render_init(RenderVars *render_vars) {
                         "Failed to initialize OpenGL");
         return false;
     }
+
+    SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "OpenGL version %d.%d",
+                GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
 
 #ifndef NDEBUG
     if (GLAD_GL_KHR_debug) {
@@ -60,8 +110,7 @@ bool render_init(RenderVars *render_vars) {
     }
 #endif
 
-    SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "OpenGL version %d.%d",
-                GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
+    gl::enable(gl::Capability::DEPTH_TEST);
 
     gl::viewport(0, 0, render_vars->window_width, render_vars->window_height);
 
@@ -74,22 +123,20 @@ bool render_init(RenderVars *render_vars) {
         return false; // todo: use exceptions
     }
 
+    // set up camera
+    render_vars->camera =
+        std::make_unique<world::Camera>(world::RenderPos(0.0f, 0.0f, 3.0f));
+
     // generate arrays/buffers
     auto VAO = std::make_unique<VertexArrayObject>();
     auto VBO = std::make_unique<BufferObject>(BufferType::ARRAY);
-    auto EBO = std::make_unique<BufferObject>(BufferType::ELEMENT_ARRAY);
     VAO->bind();
 
     VBO->bind();
     VBO->upload_data(vertices, BufferUsage::STATIC_DRAW);
 
-    EBO->bind();
-    EBO->upload_data(indices, BufferUsage::STATIC_DRAW);
-
-    VAO->init_vbo(8, GLtype::FLOAT);
+    VAO->init_vbo(5, GLtype::FLOAT);
     VAO->attrib_pointer_f(3, false); // a_pos
-    VAO->enable_attrib_array();
-    VAO->attrib_pointer_f(3, false); // a_color
     VAO->enable_attrib_array();
     VAO->attrib_pointer_f(2, false); // a_texcoord
     VAO->enable_attrib_array();
@@ -100,56 +147,63 @@ bool render_init(RenderVars *render_vars) {
 
     render_vars->VAO = std::move(VAO);
     render_vars->VBO = std::move(VBO);
-    render_vars->EBO = std::move(EBO);
 
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     // load first texture
-    ImageTexture texture0("textures/container.jpg");
-    texture0.bind_generate();
-    texture0.default_parameters();
-    texture0.upload();
-    texture0.generate_mipmap();
-    texture0.free_surface();
+    auto texture0 = std::make_unique<ImageTexture>("textures/container.jpg");
+    texture0->bind_generate();
+    texture0->default_parameters();
+    texture0->upload();
+    texture0->generate_mipmap();
+    texture0->free_surface();
     render_vars->texture0 = std::move(texture0);
 
     // load second texture
-    ImageTexture texture1("textures/awesomeface.png");
-    texture1.bind_generate();
-    texture1.default_parameters();
-    texture1.upload();
-    texture1.generate_mipmap();
-    texture1.free_surface();
+    auto texture1 = std::make_unique<ImageTexture>("textures/awesomeface.png");
+    texture1->bind_generate();
+    texture1->default_parameters();
+    texture1->upload();
+    texture1->generate_mipmap();
+    texture1->free_surface();
     render_vars->texture1 = std::move(texture1);
 
     return true;
 }
 
-void render(RenderVars *render_vars) {
-    gl::clear(gl::BufferBit::COLOR);
+void render(RenderVars *render_vars, uint64_t delta_time) {
+    gl::clear(gl::BufferBit::COLOR | gl::BufferBit::DEPTH);
 
     render_vars->shader.use();
     render_vars->shader.set_uniform_int("u_texture0", 0);
     render_vars->shader.set_uniform_int("u_texture1", 1);
 
-    render_vars->texture0.bind_active(TextureUnit::U0);
-    render_vars->texture1.bind_active(TextureUnit::U1);
-
-    glm::mat4 trans = glm::mat4(1.0f);
-    trans           = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
-    trans = glm::rotate(trans, util::get_secs(), glm::vec3(0.0f, 0.0f, 1.0f));
-    render_vars->shader.set_uniform_mat4f("u_transform", trans);
+    render_vars->texture0->bind_active(TextureUnit::U0);
+    render_vars->texture1->bind_active(TextureUnit::U1);
 
     render_vars->VAO->bind();
-    gl::draw_elements(gl::DrawMode::TRIANGLES, 6, GLtype::UNSIGNED_INT, 0);
 
-    glm::mat4 trans2 = glm::mat4(1.0f);
-    trans2           = glm::scale(trans2, glm::vec3(-1.0f));
-    trans2           = glm::translate(trans2, glm::vec3(0.5f, -0.5f, 0.0f));
-    trans2 = glm::scale(trans2, glm::vec3(-glm::sin(util::get_secs())));
-    render_vars->shader.set_uniform_mat4f("u_transform", trans2);
+    render_vars->camera->apply_transformation();
+    render_vars->shader.set_uniform_mat4f("view", render_vars->camera->view());
 
-    gl::draw_elements(gl::DrawMode::TRIANGLES, 6, GLtype::UNSIGNED_INT, 0);
+    float aspect_ratio = static_cast<float>(render_vars->window_width) /
+                         render_vars->window_height;
+
+    glm::mat4 projection =
+        glm::perspective(glm::radians(45.0f), aspect_ratio, 0.1f, 100.0f);
+    render_vars->shader.set_uniform_mat4f("projection", projection);
+
+    for (auto &cube_pos : cube_positions) {
+        auto i = &cube_pos - &cube_positions[0];
+
+        auto model = glm::mat4(1.0f);
+        model = glm::translate(model, cube_pos + glm::vec3(0.0f, 0.0f, 0.0f));
+        float angle = i * glm::radians(50.0f);
+        model       = glm::rotate(model, angle, glm::vec3(0.5f, 1.0f, 0.0f));
+        render_vars->shader.set_uniform_mat4f("model", model);
+
+        gl::draw_arrays(gl::DrawMode::TRIANGLES, 0, 36);
+    }
 }
 
 void render_quit() {}

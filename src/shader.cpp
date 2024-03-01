@@ -1,4 +1,5 @@
 #include "shader.hpp"
+#include "glm/gtc/type_ptr.hpp"
 #include "util.hpp"
 #include <algorithm> // IWYU pragma: keep  //required for bits/ranges_algo.h
 #include <bits/ranges_algo.h>
@@ -74,6 +75,11 @@ void Shader::set_uniform_mat4f(const std::string &name,
                                const glm::mat4   &value) {
     glUniformMatrix4fv(this->get_uniform_loc(name), 1, GL_FALSE,
                        glm::value_ptr(value));
+}
+
+void Shader::set_uniform_vec3f(const std::string &name,
+                               const glm::vec3   &value) {
+    glUniform3fv(this->get_uniform_loc(name), 1, glm::value_ptr(value));
 }
 
 bool Shader::compile_shader_pipe(ShaderType shader_type) {

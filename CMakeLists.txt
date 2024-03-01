@@ -8,10 +8,14 @@ add_compile_options(-Wall)
 project(unnominable
         VERSION 0.1.0.0)
 add_executable(${PROJECT_NAME}
+        src/world/camera.cpp
+        src/world/camera.hpp
+        src/world/world.hpp
         src/log.cpp
         src/log.hpp
         src/main.cpp
         src/main.hpp
+        src/math.cpp
         src/math.hpp
         src/objects.cpp
         src/objects.hpp
