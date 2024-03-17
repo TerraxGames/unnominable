@@ -18,51 +18,52 @@
 #include <SDL_surface.h>
 #include <SDL_timer.h>
 
-const std::array<GLfloat, 36 * 5> vertices = {
-    -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, //
-    0.5f,  -0.5f, -0.5f, 1.0f, 0.0f, //
-    0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, //
-    0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, //
-    -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, //
-    -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, //
+const std::array<GLfloat, 36 * 8> vertices = {
+    // positions         // normals           // texture coords
+    -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.0f, 0.0f, //
+    0.5f,  -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 1.0f, 0.0f, //
+    0.5f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f, 1.0f, 1.0f, //
+    0.5f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f, 1.0f, 1.0f, //
+    -0.5f, 0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f, 0.0f, 1.0f, //
+    -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.0f, 0.0f, //
 
-    -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, //
-    0.5f,  -0.5f, 0.5f,  1.0f, 0.0f, //
-    0.5f,  0.5f,  0.5f,  1.0f, 1.0f, //
-    0.5f,  0.5f,  0.5f,  1.0f, 1.0f, //
-    -0.5f, 0.5f,  0.5f,  0.0f, 1.0f, //
-    -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, //
+    -0.5f, -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f, //
+    0.5f,  -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 0.0f, //
+    0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f, //
+    0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f, //
+    -0.5f, 0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 1.0f, //
+    -0.5f, -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f, //
 
-    -0.5f, 0.5f,  0.5f,  1.0f, 0.0f, //
-    -0.5f, 0.5f,  -0.5f, 1.0f, 1.0f, //
-    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, //
-    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, //
-    -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, //
-    -0.5f, 0.5f,  0.5f,  1.0f, 0.0f, //
+    -0.5f, 0.5f,  0.5f,  -1.0f, 0.0f,  0.0f,  1.0f, 0.0f, //
+    -0.5f, 0.5f,  -0.5f, -1.0f, 0.0f,  0.0f,  1.0f, 1.0f, //
+    -0.5f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f,  0.0f, 1.0f, //
+    -0.5f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f,  0.0f, 1.0f, //
+    -0.5f, -0.5f, 0.5f,  -1.0f, 0.0f,  0.0f,  0.0f, 0.0f, //
+    -0.5f, 0.5f,  0.5f,  -1.0f, 0.0f,  0.0f,  1.0f, 0.0f, //
 
-    0.5f,  0.5f,  0.5f,  1.0f, 0.0f, //
-    0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, //
-    0.5f,  -0.5f, -0.5f, 0.0f, 1.0f, //
-    0.5f,  -0.5f, -0.5f, 0.0f, 1.0f, //
-    0.5f,  -0.5f, 0.5f,  0.0f, 0.0f, //
-    0.5f,  0.5f,  0.5f,  1.0f, 0.0f, //
+    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, //
+    0.5f,  0.5f,  -0.5f, 1.0f,  0.0f,  0.0f,  1.0f, 1.0f, //
+    0.5f,  -0.5f, -0.5f, 1.0f,  0.0f,  0.0f,  0.0f, 1.0f, //
+    0.5f,  -0.5f, -0.5f, 1.0f,  0.0f,  0.0f,  0.0f, 1.0f, //
+    0.5f,  -0.5f, 0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f, //
+    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, //
 
-    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, //
-    0.5f,  -0.5f, -0.5f, 1.0f, 1.0f, //
-    0.5f,  -0.5f, 0.5f,  1.0f, 0.0f, //
-    0.5f,  -0.5f, 0.5f,  1.0f, 0.0f, //
-    -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, //
-    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, //
+    -0.5f, -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,  0.0f, 1.0f, //
+    0.5f,  -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,  1.0f, 1.0f, //
+    0.5f,  -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,  1.0f, 0.0f, //
+    0.5f,  -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,  1.0f, 0.0f, //
+    -0.5f, -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,  0.0f, 0.0f, //
+    -0.5f, -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,  0.0f, 1.0f, //
 
-    -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, //
-    0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, //
-    0.5f,  0.5f,  0.5f,  1.0f, 0.0f, //
-    0.5f,  0.5f,  0.5f,  1.0f, 0.0f, //
-    -0.5f, 0.5f,  0.5f,  0.0f, 0.0f, //
-    -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, //
+    -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,  0.0f, 1.0f, //
+    0.5f,  0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,  1.0f, 1.0f, //
+    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f, //
+    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f, //
+    -0.5f, 0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f, //
+    -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,  0.0f, 1.0f, //
 };
 
-glm::vec3 cube_positions[] = {
+std::array<glm::vec3, 10> cube_positions = {
     glm::vec3(0.0f, 0.0f, 0.0f),     //
     glm::vec3(2.0f, 5.0f, -15.0f),   //
     glm::vec3(-1.5f, -2.2f, -2.5f),  //
@@ -114,14 +115,21 @@ bool render_init(RenderVars *render_vars) {
 
     gl::viewport(0, 0, render_vars->window_width, render_vars->window_height);
 
-    gl::clear_color(0.3f, 0.1f, 0.3f, 1.0f);
+    gl::clear_color(0.1f, 0.1f, 0.1f, 1.0f);
 
-    render_vars->shader = Shader();
-    render_vars->shader.add_shader_path(ShaderType::VERTEX, "shader.vert");
-    render_vars->shader.add_shader_path(ShaderType::FRAGMENT, "shader.frag");
-    if (!render_vars->shader.compile_and_link()) {
-        return false; // todo: use exceptions
-    }
+    render_vars->object_shader = Shader();
+    render_vars->object_shader.add_shader_path(ShaderType::VERTEX,
+                                               "object.vert");
+    render_vars->object_shader.add_shader_path(ShaderType::FRAGMENT,
+                                               "object.frag");
+    render_vars->object_shader.compile_and_link();
+
+    render_vars->light_shader = Shader();
+    render_vars->light_shader.add_shader_path(ShaderType::VERTEX,
+                                              "generic.vert");
+    render_vars->light_shader.add_shader_path(ShaderType::FRAGMENT,
+                                              "light.frag");
+    render_vars->light_shader.compile_and_link();
 
     // set up camera
     render_vars->camera =
@@ -135,8 +143,10 @@ bool render_init(RenderVars *render_vars) {
     VBO->bind();
     VBO->upload_data(vertices, BufferUsage::STATIC_DRAW);
 
-    VAO->init_vbo(5, GLtype::FLOAT);
+    VAO->init_vbo(8, GLtype::FLOAT);
     VAO->attrib_pointer_f(3, false); // a_pos
+    VAO->enable_attrib_array();
+    VAO->attrib_pointer_f(3, false); // a_normal
     VAO->enable_attrib_array();
     VAO->attrib_pointer_f(2, false); // a_texcoord
     VAO->enable_attrib_array();
@@ -148,25 +158,33 @@ bool render_init(RenderVars *render_vars) {
     render_vars->VAO = std::move(VAO);
     render_vars->VBO = std::move(VBO);
 
+    auto container_tex =
+        std::make_unique<ImageTexture>("textures/container2.png");
+    container_tex->bind_generate();
+    container_tex->default_parameters();
+    container_tex->upload();
+    container_tex->generate_mipmap();
+    container_tex->free_surface();
+    render_vars->container_tex = std::move(container_tex);
+
+    auto container_specular_tex =
+        std::make_unique<ImageTexture>("textures/container2_specular.png");
+    container_specular_tex->bind_generate();
+    container_specular_tex->default_parameters();
+    container_specular_tex->upload();
+    container_specular_tex->generate_mipmap();
+    container_specular_tex->free_surface();
+    render_vars->container_specular_tex = std::move(container_specular_tex);
+
+    auto emissive_tex = std::make_unique<ImageTexture>("textures/matrix.jpg");
+    emissive_tex->bind_generate();
+    emissive_tex->default_parameters();
+    emissive_tex->upload();
+    emissive_tex->generate_mipmap();
+    emissive_tex->free_surface();
+    render_vars->emissive_tex = std::move(emissive_tex);
+
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-    // load first texture
-    auto texture0 = std::make_unique<ImageTexture>("textures/container.jpg");
-    texture0->bind_generate();
-    texture0->default_parameters();
-    texture0->upload();
-    texture0->generate_mipmap();
-    texture0->free_surface();
-    render_vars->texture0 = std::move(texture0);
-
-    // load second texture
-    auto texture1 = std::make_unique<ImageTexture>("textures/awesomeface.png");
-    texture1->bind_generate();
-    texture1->default_parameters();
-    texture1->upload();
-    texture1->generate_mipmap();
-    texture1->free_surface();
-    render_vars->texture1 = std::move(texture1);
 
     return true;
 }
@@ -174,34 +192,56 @@ bool render_init(RenderVars *render_vars) {
 void render(RenderVars *render_vars, uint64_t delta_time) {
     gl::clear(gl::BufferBit::COLOR | gl::BufferBit::DEPTH);
 
-    render_vars->shader.use();
-    render_vars->shader.set_uniform_int("u_texture0", 0);
-    render_vars->shader.set_uniform_int("u_texture1", 1);
+    const auto  light_dir   = glm::vec3(-0.2f, -1.0f, -0.3f);
+    const auto  light_color = glm::vec3(1.0f, 1.0f, 1.0f);
+    const float luster      = 32.0f;
 
-    render_vars->texture0->bind_active(TextureUnit::U0);
-    render_vars->texture1->bind_active(TextureUnit::U1);
+    render_vars->camera->apply_transformation();
+
+    render_vars->object_shader.use();
 
     render_vars->VAO->bind();
 
-    render_vars->camera->apply_transformation();
-    render_vars->shader.set_uniform_mat4f("view", render_vars->camera->view());
+    render_vars->object_shader.set_uniform_vec3f("u_light.direction",
+                                                 light_dir);
+    render_vars->object_shader.set_uniform_vec3f("u_light.ambient",
+                                                 light_color / 5.0f);
+    render_vars->object_shader.set_uniform_vec3f("u_light.diffuse",
+                                                 light_color / 2.0f);
+    render_vars->object_shader.set_uniform_vec3f("u_light.specular",
+                                                 glm::vec3(1.0f));
+
+    render_vars->container_tex->bind_active(TextureUnit::U0);
+    render_vars->container_specular_tex->bind_active(TextureUnit::U1);
+    render_vars->emissive_tex->bind_active(TextureUnit::U2);
+
+    render_vars->object_shader.set_uniform_int("u_material.diffuse", 0);
+    render_vars->object_shader.set_uniform_int("u_material.specular", 1);
+    render_vars->object_shader.set_uniform_int("u_material.emissive", 2);
+    render_vars->object_shader.set_uniform_float("u_material.luster", luster);
+
+    render_vars->object_shader.set_uniform_mat4f("u_view",
+                                                 render_vars->camera->view());
 
     float aspect_ratio = static_cast<float>(render_vars->window_width) /
                          render_vars->window_height;
 
     glm::mat4 projection =
         glm::perspective(glm::radians(45.0f), aspect_ratio, 0.1f, 100.0f);
-    render_vars->shader.set_uniform_mat4f("projection", projection);
+    render_vars->object_shader.set_uniform_mat4f("u_projection", projection);
 
-    for (auto &cube_pos : cube_positions) {
-        auto i = &cube_pos - &cube_positions[0];
+    auto model = glm::mat4(1.0f);
+    render_vars->object_shader.set_uniform_mat4f("u_model", model);
 
-        auto model = glm::mat4(1.0f);
-        model = glm::translate(model, cube_pos + glm::vec3(0.0f, 0.0f, 0.0f));
-        float angle = i * glm::radians(50.0f);
-        model       = glm::rotate(model, angle, glm::vec3(0.5f, 1.0f, 0.0f));
-        render_vars->shader.set_uniform_mat4f("model", model);
+    for (int i = 0; i < cube_positions.size(); i++) {
+        auto pos = cube_positions.at(i);
 
+        glm::mat4 object_model = glm::mat4(1.0f);
+        object_model           = glm::translate(object_model, pos);
+        float angle            = 20.0f * i;
+        object_model           = glm::rotate(object_model, glm::radians(angle),
+                                             glm::vec3(1.0f, 0.3f, 0.5f));
+        render_vars->object_shader.set_uniform_mat4f("u_model", object_model);
         gl::draw_arrays(gl::DrawMode::TRIANGLES, 0, 36);
     }
 }

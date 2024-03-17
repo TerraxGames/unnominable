@@ -15,6 +15,8 @@ private:
 public:
     RenderPos position    = glm::vec3(0.0f);
     glm::quat rotation    = glm::quat_identity<float, glm::defaultp>();
+    float     pitch       = 0.0f;
+    float     yaw         = 0.0f;
     float     sensitivity = 0.1f;
 
     Camera() = default;
@@ -24,9 +26,6 @@ public:
         this->rotation = math::quatLookAt(
             this->position, target, math::Direction::UP,
             math::Direction::UP + glm::vec3(0.0f, 0.001f, 0.0f));
-
-        // i have no fucking clue why this makes it work, but it does, so...
-        this->position = this->position * this->rotation;
     }
 
     inline constexpr void look_at(const RenderPos &position,
@@ -35,22 +34,7 @@ public:
         this->look_at(target);
     }
 
-    inline constexpr void look_forward() {
-        this->look_at(math::Direction::NORTH);
-    }
-
-    inline constexpr void apply_transformation() {
-        this->view_ = glm::translate(
-            glm::mat4(1.0f) * glm::toMat4(this->rotation), -this->position);
-
-        // https://stackoverflow.com/a/53612264/11774699
-        const glm::mat4 inverted = glm::inverse(this->view_);
-        this->forward_           = glm::normalize(glm::vec3(inverted[2]));
-
-        this->right_ =
-            glm::normalize(glm::cross(math::Direction::UP, this->forward_));
-        this->up_ = glm::normalize(glm::cross(this->forward_, this->right_));
-    }
+    void apply_transformation();
 
     const glm::mat4        &view() const { return this->view_; }
     const world::RenderPos &forward() const { return this->forward_; }

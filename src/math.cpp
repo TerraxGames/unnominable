@@ -1,10 +1,4 @@
 #include "math.hpp" // IWYU pragma: keep
-#include "glm/ext/quaternion_common.hpp"
-#include "glm/ext/quaternion_geometric.hpp"
-#include "glm/ext/quaternion_transform.hpp"
-#include "glm/ext/quaternion_trigonometric.hpp"
-#include "glm/fwd.hpp"
-#include "glm/trigonometric.hpp"
 
 namespace math {
 
@@ -27,6 +21,13 @@ glm::quat quatLookAt(const glm::vec3 &position, const glm::vec3 &target,
     } else {
         return glm::quatLookAt(direction, up);
     }
+}
+
+/// gleans if the number is negative using C++ std and trig
+/// if negative, returns -1
+/// if positive, returns 1
+float negative(const float &x) {
+    return glm::cos(static_cast<float>(std::signbit(x)) * glm::pi<float>());
 }
 
 } // namespace math

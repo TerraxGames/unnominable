@@ -39,7 +39,7 @@ public:
         add_shader_path(shader_type, file_paths_vector);
     }
 
-    bool compile_and_link(); // todo: use exceptions
+    void compile_and_link(); // todo: use exceptions
 
     void use();
 
@@ -50,6 +50,7 @@ public:
     void set_uniform_float(const std::string &name, GLfloat value);
     void set_uniform_mat4f(const std::string &name, const glm::mat4 &value);
     void set_uniform_vec3f(const std::string &name, const glm::vec3 &value);
+    void set_uniform_vec4f(const std::string &name, const glm::vec4 &value);
 };
 
 #endif // UNNOMINABLE_SHADER_HPP_

@@ -9,17 +9,20 @@
 #include <memory>
 
 struct RenderVars {
-    int  window_width  = 1280;
-    int  window_height = 720;
-    bool should_quit   = false;
+    int      window_width  = 1280;
+    int      window_height = 720;
+    bool     should_quit   = false;
+    uint32_t window_id;
 
-    Shader shader;
+    Shader object_shader;
+    Shader light_shader;
 
     std::unique_ptr<world::Camera> camera;
     static constexpr float         camera_speed = 0.005f;
 
-    std::unique_ptr<ImageTexture> texture0;
-    std::unique_ptr<ImageTexture> texture1;
+    std::unique_ptr<ImageTexture> container_tex;
+    std::unique_ptr<ImageTexture> container_specular_tex;
+    std::unique_ptr<ImageTexture> emissive_tex;
 
     GLint  success;
     GLchar info_log[512];

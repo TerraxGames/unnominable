@@ -3,7 +3,7 @@
 
 #define GLM_FORCE_SWIZZLE
 #define GLM_ENABLE_EXPERIMENTAL
-#include <glm/common.hpp>
+#include <glm/common.hpp>               // IWYU pragma: keep
 #include <glm/ext/matrix_transform.hpp> // IWYU pragma: keep
 #include <glm/fwd.hpp>                  // IWYU pragma: keep
 #include <glm/geometric.hpp>            // IWYU pragma: keep
@@ -52,6 +52,8 @@ identity(value_type x, value_type y, value_type z, value_type w) {
 /// origin of this magic: https://stackoverflow.com/a/49824672/11774699
 glm::quat quatLookAt(const glm::vec3 &position, const glm::vec3 &target,
                      const glm::vec3 &up, const glm::vec3 &alternative_up);
+
+float negative(const float &x);
 
 } // namespace math
 

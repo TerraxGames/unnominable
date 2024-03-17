@@ -13,6 +13,7 @@
 #include <SDL_keyboard.h>
 #include <SDL_keycode.h>
 #include <SDL_log.h>
+#include <SDL_mouse.h>
 #include <SDL_scancode.h>
 #include <SDL_stdinc.h>
 #include <SDL_video.h>
@@ -82,6 +83,8 @@ int main() {
         return EXIT_FAILURE;
     }
 
+    render_vars.window_id = SDL_GetWindowID(window);
+
     SDL_GLContext gl_context = SDL_GL_CreateContext(window);
     if (gl_context == nullptr) {
         SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION,
@@ -93,7 +96,16 @@ int main() {
     // Enable VSync
     SDL_GL_SetSwapInterval(-1);
 
-    SDL_SetRelativeMouseMode(SDL_TRUE);
+    // Enable Window Grab
+    int supported = SDL_SetRelativeMouseMode(SDL_TRUE);
+    if (!supported) {
+        supported = SDL_CaptureMouse(SDL_TRUE);
+    }
+    if (!supported) {
+        SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION,
+                        "No mouse capture method supported!");
+        return EXIT_FAILURE;
+    }
 
     uint64_t last_frame = util::get_ms<uint64_t>();
 
@@ -173,7 +185,12 @@ void handle_SDL_event(SDL_Event &event, RenderVars &render_vars) {
         }
     }
 
-    if (event.type == SDL_MOUSEMOTION) {
+    uint32_t flags =
+        SDL_GetWindowFlags(SDL_GetWindowFromID(event.window.windowID));
+    bool is_minimized = flags & SDL_WINDOW_MINIMIZED;
+    bool is_focused =
+        (flags & SDL_WINDOW_INPUT_FOCUS) && (flags & SDL_WINDOW_MOUSE_FOCUS);
+    if (event.type == SDL_MOUSEMOTION && !is_minimized && is_focused) {
         handle_mouse_motion(event.motion, render_vars);
     }
 }
@@ -199,10 +216,10 @@ void handle_keypress(RenderVars &render_vars, uint64_t delta_time) {
             camera_speed * render_vars.camera->right();
     }
     if (state[SDL_SCANCODE_SPACE]) {
-        render_vars.camera->position += camera_speed * render_vars.camera->up();
+        render_vars.camera->position += camera_speed * math::Direction::UP;
     }
     if (state[SDL_SCANCODE_LSHIFT]) {
-        render_vars.camera->position -= camera_speed * render_vars.camera->up();
+        render_vars.camera->position -= camera_speed * math::Direction::UP;
     }
 }
 
@@ -210,16 +227,20 @@ void handle_mouse_motion(SDL_MouseMotionEvent &event, RenderVars &render_vars) {
     // https://gamedev.stackexchange.com/a/30654/178226
     // special thanks to ltjax on Gamedev Stack Exchange for solving this
     // problem!
-    float x_movement   = event.xrel * render_vars.camera->sensitivity;
-    float y_movement   = event.yrel * render_vars.camera->sensitivity;
-    float pitch        = glm::degrees(glm::pitch(render_vars.camera->rotation));
+    float      x_movement = event.xrel * render_vars.camera->sensitivity;
+    float      y_movement = event.yrel * render_vars.camera->sensitivity;
+    glm::quat &rotation   = render_vars.camera->rotation;
+    float     &pitch      = render_vars.camera->pitch;
+    float     &yaw        = render_vars.camera->yaw;
+    // reset rotation
+    rotation              = glm::quat_identity<float, glm::defaultp>();
+
     float pitch_result = pitch + y_movement;
-    if (pitch_result < 90.0f && pitch_result > -90.0f) {
-        render_vars.camera->rotation =
-            glm::angleAxis(glm::radians(y_movement), math::Direction::EAST) *
-            render_vars.camera->rotation;
+    if (pitch_result > -90.0f && pitch_result < 90.0f) {
+        pitch += y_movement;
     }
-    render_vars.camera->rotation =
-        render_vars.camera->rotation *
-        glm::angleAxis(glm::radians(x_movement), math::Direction::UP);
+    yaw      += x_movement;
+    rotation  = glm::angleAxis(glm::radians(pitch), math::Direction::EAST) *
+               rotation *
+               glm::angleAxis(glm::radians(yaw), math::Direction::UP);
 }

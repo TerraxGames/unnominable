@@ -1,5 +1,4 @@
 #include "shader.hpp"
-#include "glm/gtc/type_ptr.hpp"
 #include "util.hpp"
 #include <algorithm> // IWYU pragma: keep  //required for bits/ranges_algo.h
 #include <bits/ranges_algo.h>
@@ -8,6 +7,7 @@
 #include <map>
 #include <ranges>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
@@ -24,13 +24,13 @@ void Shader::add_shader_path(
     this->shader_paths.emplace(shader_type, file_paths_vector);
 }
 
-bool Shader::compile_and_link() {
+void Shader::compile_and_link() {
     this->shader_program = glCreateProgram();
 
     auto keys = std::views::keys(this->shader_paths);
     for (const auto shader_type : keys) {
         if (!this->compile_shader_pipe(shader_type)) {
-            return false;
+            throw std::runtime_error("Shader compilation failed!");
         }
         glAttachShader(this->shader_program,
                        this->shader_objects.at(shader_type));
@@ -42,7 +42,7 @@ bool Shader::compile_and_link() {
         glGetProgramInfoLog(this->shader_program, 512, NULL, this->info_log);
         SDL_LogCritical(SDL_LOG_CATEGORY_RENDER,
                         "Shader program linking failed:\n%s", this->info_log);
-        return false;
+        throw std::runtime_error("Shader linking failed!");
     }
 
     for (const auto &pair : this->shader_objects) {
@@ -50,7 +50,6 @@ bool Shader::compile_and_link() {
     }
 
     this->shader_objects.clear();
-    return true;
 }
 
 void Shader::use() { glUseProgram(this->shader_program); }
@@ -80,6 +79,11 @@ void Shader::set_uniform_mat4f(const std::string &name,
 void Shader::set_uniform_vec3f(const std::string &name,
                                const glm::vec3   &value) {
     glUniform3fv(this->get_uniform_loc(name), 1, glm::value_ptr(value));
+}
+
+void Shader::set_uniform_vec4f(const std::string &name,
+                               const glm::vec4   &value) {
+    glUniform4fv(this->get_uniform_loc(name), 1, glm::value_ptr(value));
 }
 
 bool Shader::compile_shader_pipe(ShaderType shader_type) {
