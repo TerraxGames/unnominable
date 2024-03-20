@@ -1,6 +1,7 @@
 #ifndef UNNOMINABLE_UTIL_HPP_
 #define UNNOMINABLE_UTIL_HPP_
 
+#include "math.hpp" // IWYU pragma: keep
 #include "types.hpp"
 #include <cstddef>
 #include <string>
@@ -39,6 +40,8 @@ inline uint64_t get_ms<uint64_t>() {
 }
 
 inline float get_secs() { return get_ms<uint32_t>() / 1000.0f; }
+
+glm::vec3 to_viewspace(glm::mat4 view, glm::vec3 position, float is_position);
 
 } // namespace util
 

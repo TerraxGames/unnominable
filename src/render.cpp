@@ -192,24 +192,29 @@ bool render_init(RenderVars *render_vars) {
 void render(RenderVars *render_vars, uint64_t delta_time) {
     gl::clear(gl::BufferBit::COLOR | gl::BufferBit::DEPTH);
 
+    render_vars->camera->apply_transformation();
+
     const auto  light_dir   = glm::vec3(-0.2f, -1.0f, -0.3f);
+    const auto  light_pos   = glm::vec3(1.2f, 1.0f, 2.0f);
     const auto  light_color = glm::vec3(1.0f, 1.0f, 1.0f);
     const float luster      = 32.0f;
-
-    render_vars->camera->apply_transformation();
 
     render_vars->object_shader.use();
 
     render_vars->VAO->bind();
 
-    render_vars->object_shader.set_uniform_vec3f("u_light.direction",
-                                                 light_dir);
+    render_vars->object_shader.set_uniform_vec3f(
+        "u_light.position",
+        util::to_viewspace(render_vars->camera->view(), light_pos, 1.0f));
     render_vars->object_shader.set_uniform_vec3f("u_light.ambient",
                                                  light_color / 5.0f);
     render_vars->object_shader.set_uniform_vec3f("u_light.diffuse",
                                                  light_color / 2.0f);
     render_vars->object_shader.set_uniform_vec3f("u_light.specular",
                                                  glm::vec3(1.0f));
+    render_vars->object_shader.set_uniform_float("u_light.constant", 1.0f);
+    render_vars->object_shader.set_uniform_float("u_light.linear", 0.09f);
+    render_vars->object_shader.set_uniform_float("u_light.quadratic", 0.032f);
 
     render_vars->container_tex->bind_active(TextureUnit::U0);
     render_vars->container_specular_tex->bind_active(TextureUnit::U1);
@@ -230,8 +235,7 @@ void render(RenderVars *render_vars, uint64_t delta_time) {
         glm::perspective(glm::radians(45.0f), aspect_ratio, 0.1f, 100.0f);
     render_vars->object_shader.set_uniform_mat4f("u_projection", projection);
 
-    auto model = glm::mat4(1.0f);
-    render_vars->object_shader.set_uniform_mat4f("u_model", model);
+    render_vars->object_shader.set_uniform_mat4f("u_model", glm::mat4(1.0f));
 
     for (int i = 0; i < cube_positions.size(); i++) {
         auto pos = cube_positions.at(i);
@@ -244,6 +248,20 @@ void render(RenderVars *render_vars, uint64_t delta_time) {
         render_vars->object_shader.set_uniform_mat4f("u_model", object_model);
         gl::draw_arrays(gl::DrawMode::TRIANGLES, 0, 36);
     }
+
+    render_vars->light_shader.use();
+    render_vars->light_shader.set_uniform_vec3f("u_light_color",
+                                                glm::vec3(1.0f, 1.0f, 1.0f));
+
+    render_vars->light_shader.set_uniform_mat4f("u_view",
+                                                render_vars->camera->view());
+    render_vars->light_shader.set_uniform_mat4f("u_projection", projection);
+    auto model = glm::mat4(1.0f);
+    model      = glm::translate(model, light_pos);
+    model      = glm::scale(model, glm::vec3(0.2f));
+    render_vars->light_shader.set_uniform_mat4f("u_model", model);
+
+    gl::draw_arrays(gl::DrawMode::TRIANGLES, 0, 36);
 }
 
 void render_quit() {}
