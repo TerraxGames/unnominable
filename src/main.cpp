@@ -31,7 +31,7 @@ int main() {
     std::cout << termstylist::ATTRS_Clear;
 #endif
 
-    auto render_vars = RenderVars{};
+    auto render_vars = render::RenderVars{};
 
     // Initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
@@ -111,7 +111,7 @@ int main() {
 
     try {
         // Initialize OpenGL
-        if (render_init(&render_vars)) {
+        if (render::init(&render_vars)) {
             SDL_Event event;
 
             while (!render_vars.should_quit) {
@@ -123,7 +123,7 @@ int main() {
                 }
                 handle_keypress(render_vars, delta_time);
 
-                render(&render_vars, delta_time);
+                render::render(&render_vars, delta_time);
 
                 last_frame = current_frame;
 
@@ -131,7 +131,7 @@ int main() {
                 SDL_GL_SwapWindow(window);
             }
 
-            render_quit();
+            render::quit();
         }
     } catch (std::exception &e) {
         if (strlen(e.what()) > 0) {
@@ -159,7 +159,7 @@ void pre_exit(SDL_GLContext &gl_context, SDL_Window *&window) {
     SDL_DestroyWindow(window);
 }
 
-void handle_SDL_event(SDL_Event &event, RenderVars &render_vars) {
+void handle_SDL_event(SDL_Event &event, render::RenderVars &render_vars) {
     if (event.type == SDL_QUIT) {
         render_vars.should_quit = true;
     }
@@ -177,7 +177,7 @@ void handle_SDL_event(SDL_Event &event, RenderVars &render_vars) {
         case SDL_WINDOWEVENT_SIZE_CHANGED:
             int window_width  = event.window.data1;
             int window_height = event.window.data2;
-            glViewport(0, 0, window_width, window_height);
+            gl::viewport(0, 0, window_width, window_height);
 
             render_vars.window_width  = window_width;
             render_vars.window_height = window_height;
@@ -195,12 +195,12 @@ void handle_SDL_event(SDL_Event &event, RenderVars &render_vars) {
     }
 }
 
-void handle_keypress(RenderVars &render_vars, uint64_t delta_time) {
+void handle_keypress(render::RenderVars &render_vars, uint64_t delta_time) {
     const uint8_t *state        = SDL_GetKeyboardState(nullptr);
     float          camera_speed = render_vars.camera_speed * delta_time;
 
     if (state[SDL_SCANCODE_W]) {
-        render_vars.camera->position -=
+        render_vars.camera->position +=
             camera_speed * render_vars.camera->forward();
     }
     if (state[SDL_SCANCODE_A]) {
@@ -208,7 +208,7 @@ void handle_keypress(RenderVars &render_vars, uint64_t delta_time) {
             camera_speed * render_vars.camera->right();
     }
     if (state[SDL_SCANCODE_S]) {
-        render_vars.camera->position +=
+        render_vars.camera->position -=
             camera_speed * render_vars.camera->forward();
     }
     if (state[SDL_SCANCODE_D]) {
@@ -223,7 +223,8 @@ void handle_keypress(RenderVars &render_vars, uint64_t delta_time) {
     }
 }
 
-void handle_mouse_motion(SDL_MouseMotionEvent &event, RenderVars &render_vars) {
+void handle_mouse_motion(SDL_MouseMotionEvent &event,
+                         render::RenderVars   &render_vars) {
     // https://gamedev.stackexchange.com/a/30654/178226
     // special thanks to ltjax on Gamedev Stack Exchange for solving this
     // problem!

@@ -1,51 +1,17 @@
 #version 460 core
-#define M_PI 3.1415926535897932384626433832795
-struct Material {
-    sampler2D diffuse;
-    sampler2D specular;
-    sampler2D emissive;
-    float luster;
-};
-struct PointLight {
-    vec3 position;
-
-    vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;
-
-    float constant;
-    float linear;
-    float quadratic;
-};
-struct DirectionalLight {
-    vec3 direction;
-
-    vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;
-};
-struct SpotLight {
-    vec3 position;
-    vec3 direction;
-    float cos_phi;
-};
-
-out vec4 FragColor;
-
-in vec3 frag_pos;
-in vec3 normal;
-in vec2 texcoord;
-
-uniform PointLight u_light;
-uniform Material u_material;
-
 void main() {
     float light_distance = length(u_light.position - frag_pos);
-    float attenuation = 1.0 / (u_light.constant + u_light.linear * light_distance + u_light.quadratic * (light_distance * light_distance));
+    // float attenuation = 1.0 / (u_light.constant + u_light.linear * light_distance + u_light.quadratic * (light_distance * light_distance));
+    float attenuation = 1.0;
 
     // ambient
     vec3 ambient = u_light.ambient * texture(u_material.diffuse, texcoord).rgb;
 
+    float cos_theta = dot(normalize(-u_light.direction), normalize(u_light.position - frag_pos));
+    // float intensity = 1.0;
+    float cos_gamma = mix(u_light.cos_gamma, 0.0, light_distance / 256);
+    float intensity = (cos_theta - cos_gamma) / (u_light.cos_phi - cos_gamma);
+    intensity = clamp(intensity, 0.0, 1.0);
     // diffuse
     vec3 norm = normalize(normal);
     vec3 light_dir = normalize(u_light.position - frag_pos);
@@ -61,9 +27,11 @@ void main() {
 
     vec3 emissive = texture(u_material.emissive, texcoord).rgb;
 
-    ambient *= attenuation;
     diffuse *= attenuation;
     specular *= attenuation;
+
+    diffuse *= intensity;
+    specular *= intensity;
 
     vec3 result = ambient + diffuse + specular;
 

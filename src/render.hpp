@@ -8,6 +8,8 @@
 #include <glad/gl.h>
 #include <memory>
 
+namespace render {
+
 struct RenderVars {
     int      window_width  = 1280;
     int      window_height = 720;
@@ -31,10 +33,23 @@ struct RenderVars {
     std::unique_ptr<BufferObject>      VBO, EBO;
 };
 
-bool render_init(RenderVars *render_vars);
+struct PointLight {
+    glm::vec3 position;
+
+    glm::vec3 diffuse;
+    glm::vec3 specular;
+
+    float constant;
+    float linear;
+    float quadratic;
+};
+
+bool init(RenderVars *render_vars);
 
 void render(RenderVars *render_vars, uint64_t delta_time);
 
-void render_quit();
+void quit();
+
+}; // namespace render
 
 #endif // UNNOMINABLE_RENDER_HPP_

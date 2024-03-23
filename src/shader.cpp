@@ -1,9 +1,9 @@
 #include "shader.hpp"
+#include "types.hpp"
 #include "util.hpp"
 #include <algorithm> // IWYU pragma: keep  //required for bits/ranges_algo.h
 #include <bits/ranges_algo.h>
 #include <fstream>
-#include <functional>
 #include <map>
 #include <ranges>
 #include <sstream>
@@ -15,7 +15,7 @@
 #include <SDL_log.h>
 
 Shader::Shader() {
-    this->shader_objects = std::map<ShaderType, GLuint>();
+    this->shader_objects = std::map<ShaderType, std::vector<GLobject>>();
     this->shader_paths   = std::map<ShaderType, std::vector<std::string>>();
 }
 
@@ -32,21 +32,25 @@ void Shader::compile_and_link() {
         if (!this->compile_shader_pipe(shader_type)) {
             throw std::runtime_error("Shader compilation failed!");
         }
-        glAttachShader(this->shader_program,
-                       this->shader_objects.at(shader_type));
+        for (GLobject shader_object : this->shader_objects.at(shader_type)) {
+            glAttachShader(this->shader_program, shader_object);
+        }
     }
 
     glLinkProgram(this->shader_program);
     glGetProgramiv(this->shader_program, GL_LINK_STATUS, &this->success);
     if (!this->success) {
-        glGetProgramInfoLog(this->shader_program, 512, NULL, this->info_log);
+        glGetProgramInfoLog(this->shader_program, INFO_LOG_SIZE, NULL,
+                            this->info_log);
         SDL_LogCritical(SDL_LOG_CATEGORY_RENDER,
                         "Shader program linking failed:\n%s", this->info_log);
         throw std::runtime_error("Shader linking failed!");
     }
 
     for (const auto &pair : this->shader_objects) {
-        glDeleteShader(pair.second);
+        for (const GLobject shader_object : pair.second) {
+            gl::delete_shader(shader_object);
+        }
     }
 
     this->shader_objects.clear();
@@ -94,7 +98,7 @@ bool Shader::compile_shader_pipe(ShaderType shader_type) {
     for (int i = 0; i < shader_paths.size(); i++) {
         std::string file_path;
         file_path += "shaders/";
-        file_path += shader_paths[i];
+        file_path += shader_paths.at(i);
 
         // https://stackoverflow.com/a/2602060/11774699
         std::ifstream shader_file(file_path);
@@ -110,32 +114,33 @@ bool Shader::compile_shader_pipe(ShaderType shader_type) {
         shader_strs[i] = shader_str;
     }
 
-    const GLchar *shader_srcs[shader_paths.size()]; // todo: use std::array
+    this->shader_objects.emplace(shader_type, std::vector<GLobject>());
+
     for (int i = 0; i < shader_paths.size(); i++) {
-        std::string *shader_str = &shader_strs[i];
-        shader_srcs[i]          = shader_str->c_str();
-    }
+        GLobject shader_object =
+            glCreateShader(std::to_underlying(shader_type));
+        std::vector<GLobject> &shader_objects =
+            this->shader_objects.at(shader_type);
+        shader_objects.emplace_back(shader_object);
 
-    GLuint shader_object = glCreateShader(std::to_underlying(shader_type));
-    this->shader_objects.emplace(shader_type, shader_object);
+        // set label
+        gl::object_label(gl::ObjectType::SHADER, shader_object,
+                         shader_paths.at(i));
 
-    // set label
-    const std::string delim = ", ";
-    const auto        label =
-        std::ranges::fold_left(shader_paths | std::views::join_with(delim),
-                               std::string{}, std::plus<>{});
-    gl::object_label(gl::ObjectType::SHADER, shader_object, label);
+        const char *shader_str = shader_strs[i].c_str();
 
-    // compile shader
-    glShaderSource(shader_object, shader_paths.size(), shader_srcs, NULL);
-    glCompileShader(shader_object);
+        // compile shader
+        glShaderSource(shader_object, 1, &shader_str, NULL);
+        glCompileShader(shader_object);
 
-    glGetShaderiv(shader_object, GL_COMPILE_STATUS, &this->success);
-    if (!this->success) {
-        glGetShaderInfoLog(shader_object, 512, NULL, this->info_log);
-        SDL_LogCritical(SDL_LOG_CATEGORY_RENDER,
-                        "Shader compilation failed:\n%s", this->info_log);
-        return false;
+        glGetShaderiv(shader_object, GL_COMPILE_STATUS, &this->success);
+        if (!this->success) {
+            glGetShaderInfoLog(shader_object, INFO_LOG_SIZE, NULL,
+                               this->info_log);
+            SDL_LogCritical(SDL_LOG_CATEGORY_RENDER,
+                            "Shader compilation failed:\n%s", this->info_log);
+            return false;
+        }
     }
 
     return true;

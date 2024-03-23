@@ -137,6 +137,14 @@ inline void clear_color(GLfloat r, GLfloat g, GLfloat b, GLfloat a) {
     glClearColor(r, g, b, a);
 }
 
+// Shaders
+
+inline void attach_shader(GLobject program, GLobject shader) {
+    glAttachShader(program, shader);
+}
+
+inline void delete_shader(GLobject shader) { glDeleteShader(shader); }
+
 // State Management
 
 enum class Variable : GLenum {

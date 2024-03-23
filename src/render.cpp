@@ -1,5 +1,6 @@
 #include "render.hpp"
 #include "log.hpp"
+#include "math.hpp"
 #include "objects.hpp"
 #include "shader.hpp"
 #include "texture.hpp"
@@ -9,6 +10,7 @@
 #include "world/world.hpp"
 #include <glad/gl.h>
 #include <memory>
+#include <ranges>
 #include <utility>
 #include <SDL.h>
 #include <SDL_error.h>
@@ -17,6 +19,8 @@
 #include <SDL_pixels.h>
 #include <SDL_surface.h>
 #include <SDL_timer.h>
+
+namespace render {
 
 const std::array<GLfloat, 36 * 8> vertices = {
     // positions         // normals           // texture coords
@@ -76,7 +80,26 @@ std::array<glm::vec3, 10> cube_positions = {
     glm::vec3(-1.3f, 1.0f, -1.5f),   //
 };
 
-bool render_init(RenderVars *render_vars) {
+std::vector<PointLight> point_lights = {
+    PointLight{
+        .position  = glm::vec3(1.2f, 1.0f, 2.0f),
+        .diffuse   = glm::vec3(0.5f),
+        .specular  = glm::vec3(1.0f),
+        .constant  = 1.0f,
+        .linear    = 0.09f,
+        .quadratic = 0.032f,
+    },
+    PointLight{
+        .position  = glm::vec3(-2.5f, 2.0f, -1.5f),
+        .diffuse   = glm::vec3(0.75f, 0.25f, 0.75f),
+        .specular  = glm::vec3(1.0f, 0.5f, 1.0f),
+        .constant  = 1.0f,
+        .linear    = 0.09f,
+        .quadratic = 0.032f,
+    },
+};
+
+bool init(RenderVars *render_vars) {
     int version =
         gladLoadGL(reinterpret_cast<GLADloadfunc>(SDL_GL_GetProcAddress));
     if (version == 0) {
@@ -119,9 +142,10 @@ bool render_init(RenderVars *render_vars) {
 
     render_vars->object_shader = Shader();
     render_vars->object_shader.add_shader_path(ShaderType::VERTEX,
-                                               "object.vert");
-    render_vars->object_shader.add_shader_path(ShaderType::FRAGMENT,
-                                               "object.frag");
+                                               "object/object.vert");
+    render_vars->object_shader.add_shader_path(
+        ShaderType::FRAGMENT, "object/directional_light.frag",
+        "object/point_light.frag", "object/object.frag");
     render_vars->object_shader.compile_and_link();
 
     render_vars->light_shader = Shader();
@@ -194,27 +218,48 @@ void render(RenderVars *render_vars, uint64_t delta_time) {
 
     render_vars->camera->apply_transformation();
 
-    const auto  light_dir   = glm::vec3(-0.2f, -1.0f, -0.3f);
-    const auto  light_pos   = glm::vec3(1.2f, 1.0f, 2.0f);
-    const auto  light_color = glm::vec3(1.0f, 1.0f, 1.0f);
-    const float luster      = 32.0f;
+    const auto  global_light_dir   = glm::vec3(-0.2f, -1.0f, -0.3f);
+    const auto  global_light_color = glm::vec3(1.0f);
+    const float luster             = 32.0f;
+    const float spotlight_angle    = glm::radians(12.5f);
 
     render_vars->object_shader.use();
 
     render_vars->VAO->bind();
 
+    render_vars->object_shader.set_uniform_vec3f("u_ambient",
+                                                 glm::vec3(0.2f, 0.2f, 0.2f));
+
     render_vars->object_shader.set_uniform_vec3f(
-        "u_light.position",
-        util::to_viewspace(render_vars->camera->view(), light_pos, 1.0f));
-    render_vars->object_shader.set_uniform_vec3f("u_light.ambient",
-                                                 light_color / 5.0f);
-    render_vars->object_shader.set_uniform_vec3f("u_light.diffuse",
-                                                 light_color / 2.0f);
-    render_vars->object_shader.set_uniform_vec3f("u_light.specular",
-                                                 glm::vec3(1.0f));
-    render_vars->object_shader.set_uniform_float("u_light.constant", 1.0f);
-    render_vars->object_shader.set_uniform_float("u_light.linear", 0.09f);
-    render_vars->object_shader.set_uniform_float("u_light.quadratic", 0.032f);
+        "u_global_illumination.direction",
+        util::to_viewspace(render_vars->camera->view(), global_light_dir,
+                           0.0f));
+    render_vars->object_shader.set_uniform_vec3f(
+        "u_global_illumination.diffuse", global_light_color / 2.0f);
+    render_vars->object_shader.set_uniform_vec3f(
+        "u_global_illumination.specular", glm::vec3(1.0f));
+
+    render_vars->object_shader.set_uniform_int("u_num_lights",
+                                               point_lights.size());
+
+    for (auto const &[index, point_light] :
+         point_lights | std::views::enumerate) {
+        const std::string &name = std::format("u_point_lights[{}]", index);
+        render_vars->object_shader.set_uniform_vec3f(
+            name, "position",
+            util::to_viewspace(render_vars->camera->view(),
+                               point_light.position, 1.0f));
+        render_vars->object_shader.set_uniform_vec3f(name, "diffuse",
+                                                     point_light.diffuse);
+        render_vars->object_shader.set_uniform_vec3f(name, "specular",
+                                                     point_light.specular);
+        render_vars->object_shader.set_uniform_float(name, "constant",
+                                                     point_light.constant);
+        render_vars->object_shader.set_uniform_float(name, "linear",
+                                                     point_light.linear);
+        render_vars->object_shader.set_uniform_float(name, "quadratic",
+                                                     point_light.quadratic);
+    }
 
     render_vars->container_tex->bind_active(TextureUnit::U0);
     render_vars->container_specular_tex->bind_active(TextureUnit::U1);
@@ -250,18 +295,23 @@ void render(RenderVars *render_vars, uint64_t delta_time) {
     }
 
     render_vars->light_shader.use();
-    render_vars->light_shader.set_uniform_vec3f("u_light_color",
-                                                glm::vec3(1.0f, 1.0f, 1.0f));
 
     render_vars->light_shader.set_uniform_mat4f("u_view",
                                                 render_vars->camera->view());
     render_vars->light_shader.set_uniform_mat4f("u_projection", projection);
-    auto model = glm::mat4(1.0f);
-    model      = glm::translate(model, light_pos);
-    model      = glm::scale(model, glm::vec3(0.2f));
-    render_vars->light_shader.set_uniform_mat4f("u_model", model);
 
-    gl::draw_arrays(gl::DrawMode::TRIANGLES, 0, 36);
+    for (const auto &point_light : point_lights) {
+        render_vars->light_shader.set_uniform_vec3f("u_light_color",
+                                                    point_light.diffuse);
+        auto model = glm::mat4(1.0f);
+        model      = glm::translate(model, point_light.position);
+        model      = glm::scale(model, glm::vec3(0.2f));
+        render_vars->light_shader.set_uniform_mat4f("u_model", model);
+
+        gl::draw_arrays(gl::DrawMode::TRIANGLES, 0, 36);
+    }
 }
 
-void render_quit() {}
+void quit() {}
+
+}; // namespace render

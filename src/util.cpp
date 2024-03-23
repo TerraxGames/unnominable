@@ -27,8 +27,8 @@ size_t sizeof_gltype(GLtype type) {
     }
 }
 
-glm::vec3 to_viewspace(glm::mat4 view, glm::vec3 position, float is_position) {
-    return glm::vec3(view * glm::vec4(position, is_position));
+glm::vec3 to_viewspace(glm::mat4 view, glm::vec3 vec, float is_position) {
+    return glm::vec3(view * glm::vec4(vec, is_position));
 }
 
 } // namespace util

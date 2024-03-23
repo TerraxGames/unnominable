@@ -10,10 +10,10 @@ void Camera::apply_transformation() {
 
     // https://stackoverflow.com/a/53612264/11774699
     const glm::mat4 inverted = glm::inverse(this->view_);
-    this->forward_           = glm::normalize(glm::vec3(inverted[2]));
+    this->forward_           = -glm::normalize(glm::vec3(inverted[2]));
 
     this->right_ =
-        glm::normalize(glm::cross(math::Direction::UP, this->forward_));
+        glm::normalize(glm::cross(this->forward_, math::Direction::UP));
     this->up_ = glm::normalize(glm::cross(this->forward_, this->right_));
 }
 
