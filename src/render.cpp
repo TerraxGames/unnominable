@@ -1,6 +1,6 @@
 #include "render.hpp"
 #include "log.hpp"
-#include "math.hpp"
+#include "math.hpp" // IWYU pragma: keep
 #include "objects.hpp"
 #include "shader.hpp"
 #include "texture.hpp"
@@ -93,6 +93,14 @@ std::vector<PointLight> point_lights = {
         .position  = glm::vec3(-2.5f, 2.0f, -1.5f),
         .diffuse   = glm::vec3(0.75f, 0.25f, 0.75f),
         .specular  = glm::vec3(1.0f, 0.5f, 1.0f),
+        .constant  = 1.0f,
+        .linear    = 0.045f,
+        .quadratic = 0.0075f,
+    },
+    PointLight{
+        .position  = glm::vec3(0.0f, 0.0f, -3.0f),
+        .diffuse   = glm::vec3(0.75f, 0.0f, 0.0f),
+        .specular  = glm::vec3(1.0f, 0.0f, 0.0f),
         .constant  = 1.0f,
         .linear    = 0.09f,
         .quadratic = 0.032f,
@@ -230,14 +238,15 @@ void render(RenderVars *render_vars, uint64_t delta_time) {
     render_vars->object_shader.set_uniform_vec3f("u_ambient",
                                                  glm::vec3(0.2f, 0.2f, 0.2f));
 
+    constexpr const char *name = "u_global_illumination";
     render_vars->object_shader.set_uniform_vec3f(
-        "u_global_illumination.direction",
+        name, "direction",
         util::to_viewspace(render_vars->camera->view(), global_light_dir,
                            0.0f));
-    render_vars->object_shader.set_uniform_vec3f(
-        "u_global_illumination.diffuse", global_light_color / 2.0f);
-    render_vars->object_shader.set_uniform_vec3f(
-        "u_global_illumination.specular", glm::vec3(1.0f));
+    render_vars->object_shader.set_uniform_vec3f(name, "diffuse",
+                                                 global_light_color / 2.0f);
+    render_vars->object_shader.set_uniform_vec3f(name, "specular",
+                                                 glm::vec3(1.0f));
 
     render_vars->object_shader.set_uniform_int("u_num_lights",
                                                point_lights.size());
@@ -302,7 +311,7 @@ void render(RenderVars *render_vars, uint64_t delta_time) {
 
     for (const auto &point_light : point_lights) {
         render_vars->light_shader.set_uniform_vec3f("u_light_color",
-                                                    point_light.diffuse);
+                                                    point_light.specular);
         auto model = glm::mat4(1.0f);
         model      = glm::translate(model, point_light.position);
         model      = glm::scale(model, glm::vec3(0.2f));
