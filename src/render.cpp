@@ -107,6 +107,75 @@ std::vector<PointLight> point_lights = {
     },
 };
 
+Mesh::Mesh(std::vector<Vertex> &vertices, std::vector<unsigned int> &indices,
+           std::vector<Texture> &textures) {
+    this->vertices = vertices;
+    this->indices  = indices;
+    this->textures = textures;
+
+    this->initialize_mesh();
+}
+
+void Mesh::initialize_mesh() {
+    this->VAO = std::make_unique<VertexArrayObject>();
+    this->VBO = std::make_unique<BufferObject>(BufferType::ARRAY);
+    this->EBO = std::make_unique<BufferObject>(BufferType::ELEMENT_ARRAY);
+
+    this->VAO->bind();
+    this->VBO->bind();
+    this->EBO->bind();
+
+    this->VBO->upload_data(this->vertices, BufferUsage::STATIC_DRAW);
+
+    this->EBO->upload_data(this->indices, BufferUsage::STATIC_DRAW);
+
+    this->VAO->init_vbo(5, GLtype::FLOAT);
+    this->VAO->attrib_pointer_f(3, false);
+    this->VAO->enable_attrib_array();
+    this->VAO->attrib_pointer_f(3, false);
+    this->VAO->enable_attrib_array();
+    this->VAO->attrib_pointer_f(2, false);
+    this->VAO->enable_attrib_array();
+}
+
+void Mesh::draw(Shader &shader) {
+    // bind textures
+    int diffuse_index  = 0;
+    int specular_index = 0;
+    int other_index    = 0;
+    for (const auto &[index, texture] :
+         this->textures | std::views::enumerate) {
+        texture.bind_active(get_texture_unit(index));
+
+        switch (texture.type) {
+        case TextureType::DIFFUSE:
+            texture.bind_active(get_texture_unit(index));
+            shader.set_uniform_int(
+                std::format("u_material.diffuse{}", diffuse_index), index);
+            diffuse_index++;
+            break;
+        case TextureType::SPECULAR:
+            shader.set_uniform_int(
+                std::format("u_material.specular{}", specular_index), index);
+            specular_index++;
+            break;
+        case TextureType::OTHER:
+            shader.set_uniform_int(std::format("u_texture{}", other_index),
+                                   index);
+            other_index++;
+            break;
+        default:
+            throw TextureLoadException(std::format("N/A (index #{})", index),
+                                       "Unknown texture type!");
+        }
+    }
+
+    // draw mesh
+    this->VAO->bind();
+    gl::draw_elements(gl::DrawMode::TRIANGLES, this->indices.size(),
+                      GLtype::FLOAT, nullptr);
+}
+
 bool init(RenderVars *render_vars) {
     int version =
         gladLoadGL(reinterpret_cast<GLADloadfunc>(SDL_GL_GetProcAddress));
@@ -132,9 +201,9 @@ bool init(RenderVars *render_vars) {
 
         gl::enable(gl::Capability::DEBUG_OUTPUT);
         gl::enable(gl::Capability::DEBUG_OUTPUT_SYNCHRONOUS);
-        glDebugMessageCallback(UN_glDebugMessage, nullptr);
-        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0,
-                              nullptr, GL_TRUE);
+        gl::debug_message_callback(UN_glDebugMessage, nullptr);
+        gl::debug_message_control(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0,
+                                  nullptr, GL_TRUE);
     } else {
         SDL_LogDebug(UN_LOG_CATEGORY_OPENGL,
                      "KHR_debug extension not found! Consider implementing "

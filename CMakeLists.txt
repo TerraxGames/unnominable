@@ -31,11 +31,15 @@ add_executable(${PROJECT_NAME}
         src/util.hpp)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/sdl2)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/assimp)
 
 find_package(SDL2 REQUIRED)
 find_package(SDL2_image REQUIRED)
 find_package(SDL2_gfx REQUIRED)
 find_package(SDL2_ttf REQUIRED)
+
+find_package(assimp REQUIRED)
+include_directories("${assimp_INCLUDE_DIRS}")
 
 add_library(GLAD STATIC "${CMAKE_SOURCE_DIR}/lib/glad/src/gl.c")
 include_directories("${CMAKE_SOURCE_DIR}/lib/glad/include/")
@@ -44,4 +48,4 @@ include_directories("${CMAKE_SOURCE_DIR}/lib/termstylist/include/")
 
 include_directories("${CMAKE_SOURCE_DIR}/lib/include/")
 
-target_link_libraries(${PROJECT_NAME} PRIVATE SDL2::Main SDL2::Image SDL2::GFX SDL2::TTF GLAD)
+target_link_libraries(${PROJECT_NAME} PRIVATE SDL2::Main SDL2::Image SDL2::GFX SDL2::TTF assimp GLAD)

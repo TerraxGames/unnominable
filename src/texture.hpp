@@ -42,7 +42,7 @@ enum class TextureFormat : GLenum {
     DEPTH_STENCIL   = GL_DEPTH_STENCIL
 };
 
-enum class TextureType : GLenum {
+enum class TextureDimensionality : GLenum {
     TEX1D                   = GL_TEXTURE_1D,
     TEX2D                   = GL_TEXTURE_2D,
     TEX3D                   = GL_TEXTURE_3D,
@@ -91,6 +91,8 @@ enum class TextureUnit : GLenum {
     U31 = GL_TEXTURE31,
 };
 
+TextureUnit get_texture_unit(GLenum index);
+
 enum class TextureParameter : GLenum {
     DEPTH_STENCIL_TEXTURE_MODE = GL_DEPTH_STENCIL_TEXTURE_MODE,
     BASE_LEVEL                 = GL_TEXTURE_BASE_LEVEL,
@@ -138,11 +140,18 @@ enum class TextureDataType : GLenum {
     UNSIGNED_INT_2_10_10_10_REV = GL_UNSIGNED_INT_2_10_10_10_REV,
 };
 
+enum class TextureType {
+    DIFFUSE,
+    SPECULAR,
+    OTHER,
+};
+
 class Texture {
 private:
-    const void *data_;
-    TextureType type_;
+    const void           *data_;
+    TextureDimensionality dimensionality_;
 
+    // FIXME: why are these private?
     /// Sets a texture parameter using glTextureParameterfv.
     void parameter_fv(TextureVectorParameter parameter, const GLfloat *values);
     /// Sets a texture parameter using glTextureParameteriv.
@@ -151,8 +160,9 @@ private:
 public:
     GLuint        object;
     TextureFormat format;
+    TextureType   type = TextureType::OTHER;
 
-    Texture(TextureType type);
+    Texture(TextureDimensionality dimensionality);
 
     /// Generates the texture using glGenTextures.
     void generate();
@@ -205,7 +215,9 @@ public:
     }
     void data(const void *data) { data_ = std::move(data); }
 
-    const TextureType &type() const { return type_; }
+    const TextureDimensionality &dimensionality() const {
+        return dimensionality_;
+    }
 };
 
 /// A two-dimensional texture.
@@ -214,7 +226,7 @@ private:
     GLsizei width_, height_;
 
 public:
-    Texture2D(TextureType type);
+    Texture2D(TextureDimensionality dimensionality);
 
     /// Upload two-dimensional texture data.
     void upload(TextureDataType data_type);

@@ -5,12 +5,21 @@
 #include <SDL_log.h>
 #include <SDL_surface.h>
 
-Texture::Texture(TextureType type) { this->type_ = type; }
+TextureUnit get_texture_unit(GLenum index) {
+    if (index > 31) {
+        throw std::runtime_error(
+            std::format("Invalid texture unit #{}", index));
+    }
+
+    return TextureUnit{index};
+}
+
+Texture::Texture(TextureDimensionality type) { this->dimensionality_ = type; }
 
 void Texture::generate() { glGenTextures(1, &this->object); }
 
 void Texture::bind() {
-    glBindTexture(std::to_underlying(this->type()), this->object);
+    glBindTexture(std::to_underlying(this->dimensionality()), this->object);
 }
 
 void Texture::bind_generate() {
@@ -25,14 +34,14 @@ void Texture::bind_active(TextureUnit texture_unit) {
 
 void Texture::upload_2d(GLsizei width, GLsizei height,
                         TextureDataType data_type) {
-    glTexImage2D(std::to_underlying(this->type()), 0,
+    glTexImage2D(std::to_underlying(this->dimensionality()), 0,
                  std::to_underlying(this->format), width, height, 0,
                  std::to_underlying(this->format),
                  std::to_underlying(data_type), this->data_);
 }
 
 void Texture::generate_mipmap() {
-    glGenerateMipmap(std::to_underlying(this->type()));
+    glGenerateMipmap(std::to_underlying(this->dimensionality()));
 }
 
 void Texture::parameter_f(TextureParameter parameter, GLfloat value) {
@@ -53,14 +62,14 @@ void Texture::parameter_iv(TextureVectorParameter parameter,
     glTextureParameteriv(this->object, std::to_underlying(parameter), values);
 }
 
-Texture2D::Texture2D(TextureType type) : Texture(type) {}
+Texture2D::Texture2D(TextureDimensionality type) : Texture(type) {}
 
 void Texture2D::upload(TextureDataType data_type) {
     this->upload_2d(this->width_, this->height_, data_type);
 }
 
 ImageTexture::ImageTexture(const std::string &path)
-    : Texture2D(TextureType::TEX2D) {
+    : Texture2D(TextureDimensionality::TEX2D) {
     this->path    = path;
     this->surface = IMG_Load(path.c_str());
     if (!this->surface) {

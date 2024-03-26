@@ -5,6 +5,7 @@
 #include "util.hpp"
 #include <array>
 #include <cstddef>
+#include <vector>
 
 /// The buffer target.
 /// Quoth the wiki,
@@ -66,6 +67,11 @@ public:
     template <typename T, size_t N>
     void upload_data(const std::array<T, N> &data, BufferUsage usage) {
         this->upload_data(N * sizeof(T), data.data(), usage);
+    }
+    /// Upload buffer data to the GPU.
+    template <typename T>
+    void upload_data(const std::vector<T> &data, BufferUsage usage) {
+        this->upload_data(data.size() * sizeof(T), data.data(), usage);
     }
 
     const BufferType &type() const { return type_; }

@@ -16,7 +16,7 @@ typedef glm::tvec3<int64_t> QuadrantPos;
 
 /// This kind of position interacts with the world, and in turn, quadrants.
 struct WorldPos {
-    glm::vec3   vec;
+    glm::vec3   relative;
     QuadrantPos quadrant;
 };
 

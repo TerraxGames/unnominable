@@ -461,6 +461,18 @@ inline void viewport(GLint x, GLint y, GLsizei width, GLsizei height) {
     glViewport(x, y, width, height);
 }
 
+// Debug
+
+inline void debug_message_callback(GLDEBUGPROC callback, void *user_param) {
+    glDebugMessageCallback(callback, user_param);
+}
+
+inline void debug_message_control(GLenum source, GLenum type, GLenum severity,
+                                  GLsizei count, const GLuint *ids,
+                                  GLboolean enable) {
+    glDebugMessageControl(source, type, severity, count, ids, enable);
+}
+
 } // namespace gl
 
 #endif // UNNOMINABLE_UTIL_HPP_

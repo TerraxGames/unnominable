@@ -4,6 +4,7 @@
 #include "objects.hpp"
 #include "shader.hpp"
 #include "texture.hpp"
+#include "types.hpp"
 #include "world/camera.hpp"
 #include <glad/gl.h>
 #include <memory>
@@ -42,6 +43,33 @@ struct PointLight {
     float constant;
     float linear;
     float quadratic;
+};
+
+struct Vertex {
+    glm::vec3 position;
+    glm::vec3 normal;
+    glm::vec2 texcoords;
+};
+// ask the compiler to pretty please reject this type if its largest
+// primitive isn't 4 bytes
+static_assert(alignof(Vertex) == alignof(float));
+
+class Mesh {
+private:
+    std::unique_ptr<VertexArrayObject> VAO;
+    std::unique_ptr<BufferObject>      VBO, EBO;
+
+    void initialize_mesh();
+
+public:
+    std::vector<Vertex>       vertices;
+    std::vector<unsigned int> indices;
+    std::vector<Texture>      textures;
+
+    Mesh(std::vector<Vertex> &vertices, std::vector<unsigned int> &indices,
+         std::vector<Texture> &textures);
+
+    void draw(Shader &shader);
 };
 
 bool init(RenderVars *render_vars);
