@@ -18,7 +18,7 @@ struct PointLight {
 
 in vec3 frag_pos;
 
-uniform Material u_material;
+uniform Material u_material0;
 
 vec3 calculate_point_light(PointLight light, vec3 norm, vec3 initial_diffuse, vec3 view_dir, vec3 initial_specular) {
     float light_distance = length(light.position - frag_pos);
@@ -31,7 +31,7 @@ vec3 calculate_point_light(PointLight light, vec3 norm, vec3 initial_diffuse, ve
 
     // specular
     vec3 reflect_dir = reflect(-light_dir, norm);
-    float specular_dot = pow(max(dot(view_dir, reflect_dir), 0.0), u_material.luster);
+    float specular_dot = pow(max(dot(view_dir, reflect_dir), 0.0), u_material0.luster);
     vec3 specular = light.specular * specular_dot * initial_specular;
 
     diffuse *= attenuation;

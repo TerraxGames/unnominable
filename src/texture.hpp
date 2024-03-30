@@ -1,5 +1,7 @@
 #ifndef UNNOMINABLE_TEXTURE_HPP_
 #define UNNOMINABLE_TEXTURE_HPP_
+#include "types.hpp"
+#include <assimp/material.h>
 #include <exception>
 #include <format>
 #include <glad/gl.h>
@@ -140,11 +142,23 @@ enum class TextureDataType : GLenum {
     UNSIGNED_INT_2_10_10_10_REV = GL_UNSIGNED_INT_2_10_10_10_REV,
 };
 
-enum class TextureType {
-    DIFFUSE,
-    SPECULAR,
-    OTHER,
+enum class TextureType : int {
+    DIFFUSE  = aiTextureType_DIFFUSE,
+    SPECULAR = aiTextureType_SPECULAR,
+    EMISSIVE = aiTextureType_EMISSIVE,
+    MISC     = aiTextureType_UNKNOWN,
 };
+
+consteval std::string get_texture_type_name(TextureType texture_type) {
+    switch (texture_type) {
+    case TextureType::DIFFUSE:
+        return "diffuse";
+    case TextureType::SPECULAR:
+        return "specular";
+    case TextureType::MISC:
+        return "misc";
+    }
+}
 
 class Texture {
 private:
@@ -158,9 +172,9 @@ private:
     void parameter_iv(TextureVectorParameter parameter, const GLint *values);
 
 public:
-    GLuint        object;
+    GLobject      object;
     TextureFormat format;
-    TextureType   type = TextureType::OTHER;
+    TextureType   type = TextureType::MISC;
 
     Texture(TextureDimensionality dimensionality);
 

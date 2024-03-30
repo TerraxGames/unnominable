@@ -16,12 +16,12 @@ const std::array<std::string, SDL_NUM_LOG_PRIORITIES> PRIORITY_PREFIXES = {
     termstylist::EO_FG256.FG256_160 + "CRITICAL",
 };
 
-const std::array<std::string, UN_LOG_NUM_CATEGORIES> CATEGORY_PREFIXES = {
+const std::array<std::string, UN_NUM_LOG_CATEGORIES> CATEGORY_PREFIXES = {
     "App",       "Error",     "Assert",    "System",     "Audio",
     "Video",     "Render",    "Input",     "Test",       "Reserved1",
     "Reserved2", "Reserved3", "Reserved4", "Reserved5",  "Reserved6",
     "Reserved7", "Reserved8", "Reserved9", "Reserved10", "Custom",
-    "OpenGL",
+    "OpenGL",    "Assimp",
 };
 
 const std::array<std::string, 4> GL_DEBUG_SEVERITY_PREFIXES = {
@@ -127,6 +127,9 @@ void GLAD_API_PTR UN_glDebugMessage(GLenum source, GLenum type, GLuint id,
                                     GLenum severity, GLsizei length,
                                     const GLchar *message,
                                     const void   *user_param) {
+    // ignore non-significant error/warning codes
+    if (id == 131169 || id == 131185 || id == 131218 || id == 131204)
+        return;
     SDL_LogMessage(UN_LOG_CATEGORY_OPENGL, static_cast<SDL_LogPriority>(0),
                    "{%s/%s} %s  %s", UN_glGetDebugSourcePrefix(source),
                    UN_glGetDebugTypePrefix(type),

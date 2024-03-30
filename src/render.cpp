@@ -1,6 +1,7 @@
 #include "render.hpp"
 #include "log.hpp"
 #include "math.hpp" // IWYU pragma: keep
+#include "model.hpp"
 #include "objects.hpp"
 #include "shader.hpp"
 #include "texture.hpp"
@@ -8,10 +9,17 @@
 #include "util.hpp"
 #include "world/camera.hpp"
 #include "world/world.hpp"
-#include <glad/gl.h>
 #include <memory>
 #include <ranges>
 #include <utility>
+
+#include <assimp/Importer.hpp>
+#include <assimp/material.h>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
+#include <assimp/vector2.h>
+#include <assimp/vector3.h>
+#include <glad/gl.h>
 #include <SDL.h>
 #include <SDL_error.h>
 #include <SDL_image.h>
@@ -107,74 +115,25 @@ std::vector<PointLight> point_lights = {
     },
 };
 
-Mesh::Mesh(std::vector<Vertex> &vertices, std::vector<unsigned int> &indices,
-           std::vector<Texture> &textures) {
-    this->vertices = vertices;
-    this->indices  = indices;
-    this->textures = textures;
+std::vector<Model> models{};
 
-    this->initialize_mesh();
-}
-
-void Mesh::initialize_mesh() {
-    this->VAO = std::make_unique<VertexArrayObject>();
-    this->VBO = std::make_unique<BufferObject>(BufferType::ARRAY);
-    this->EBO = std::make_unique<BufferObject>(BufferType::ELEMENT_ARRAY);
-
-    this->VAO->bind();
-    this->VBO->bind();
-    this->EBO->bind();
-
-    this->VBO->upload_data(this->vertices, BufferUsage::STATIC_DRAW);
-
-    this->EBO->upload_data(this->indices, BufferUsage::STATIC_DRAW);
-
-    this->VAO->init_vbo(5, GLtype::FLOAT);
-    this->VAO->attrib_pointer_f(3, false);
-    this->VAO->enable_attrib_array();
-    this->VAO->attrib_pointer_f(3, false);
-    this->VAO->enable_attrib_array();
-    this->VAO->attrib_pointer_f(2, false);
-    this->VAO->enable_attrib_array();
-}
-
-void Mesh::draw(Shader &shader) {
-    // bind textures
-    int diffuse_index  = 0;
-    int specular_index = 0;
-    int other_index    = 0;
-    for (const auto &[index, texture] :
-         this->textures | std::views::enumerate) {
-        texture.bind_active(get_texture_unit(index));
-
-        switch (texture.type) {
-        case TextureType::DIFFUSE:
-            texture.bind_active(get_texture_unit(index));
-            shader.set_uniform_int(
-                std::format("u_material.diffuse{}", diffuse_index), index);
-            diffuse_index++;
-            break;
-        case TextureType::SPECULAR:
-            shader.set_uniform_int(
-                std::format("u_material.specular{}", specular_index), index);
-            specular_index++;
-            break;
-        case TextureType::OTHER:
-            shader.set_uniform_int(std::format("u_texture{}", other_index),
-                                   index);
-            other_index++;
-            break;
-        default:
-            throw TextureLoadException(std::format("N/A (index #{})", index),
-                                       "Unknown texture type!");
-        }
-    }
-
-    // draw mesh
-    this->VAO->bind();
-    gl::draw_elements(gl::DrawMode::TRIANGLES, this->indices.size(),
-                      GLtype::FLOAT, nullptr);
-}
+std::map<size_t, std::vector<glm::vec3>> model_positions = {
+    {
+        0,
+        {
+            glm::vec3(0.0f, 0.0f, 0.0f),
+            // glm::vec3(2.0f, 5.0f, -15.0f),
+            // glm::vec3(-1.5f, -2.2f, -2.5f),
+            // glm::vec3(-3.8f, -2.0f, -12.3f),
+            // glm::vec3(2.4f, -0.4f, -3.5f),
+            // glm::vec3(-1.7f, 3.0f, -7.5f),
+            // glm::vec3(1.3f, -2.0f, -2.5f),
+            // glm::vec3(1.5f, 2.0f, -2.5f),
+            // glm::vec3(1.5f, 0.2f, -1.5f),
+            // glm::vec3(-1.3f, 1.0f, -1.5f),
+        },
+    },
+};
 
 bool init(RenderVars *render_vars) {
     int version =
@@ -285,6 +244,9 @@ bool init(RenderVars *render_vars) {
     emissive_tex->free_surface();
     render_vars->emissive_tex = std::move(emissive_tex);
 
+    Model test_model("models/backpack/backpack.obj");
+    models.emplace_back(std::move(test_model));
+
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     return true;
@@ -298,7 +260,7 @@ void render(RenderVars *render_vars, uint64_t delta_time) {
     const auto  global_light_dir   = glm::vec3(-0.2f, -1.0f, -0.3f);
     const auto  global_light_color = glm::vec3(1.0f);
     const float luster             = 32.0f;
-    const float spotlight_angle    = glm::radians(12.5f);
+    // const float spotlight_angle    = glm::radians(12.5f);
 
     render_vars->object_shader.use();
 
@@ -339,15 +301,6 @@ void render(RenderVars *render_vars, uint64_t delta_time) {
                                                      point_light.quadratic);
     }
 
-    render_vars->container_tex->bind_active(TextureUnit::U0);
-    render_vars->container_specular_tex->bind_active(TextureUnit::U1);
-    render_vars->emissive_tex->bind_active(TextureUnit::U2);
-
-    render_vars->object_shader.set_uniform_int("u_material.diffuse", 0);
-    render_vars->object_shader.set_uniform_int("u_material.specular", 1);
-    render_vars->object_shader.set_uniform_int("u_material.emissive", 2);
-    render_vars->object_shader.set_uniform_float("u_material.luster", luster);
-
     render_vars->object_shader.set_uniform_mat4f("u_view",
                                                  render_vars->camera->view());
 
@@ -360,19 +313,22 @@ void render(RenderVars *render_vars, uint64_t delta_time) {
 
     render_vars->object_shader.set_uniform_mat4f("u_model", glm::mat4(1.0f));
 
-    for (int i = 0; i < cube_positions.size(); i++) {
-        auto pos = cube_positions.at(i);
+    render_vars->object_shader.set_uniform_float("u_material0.luster", luster);
+    for (const auto &[index, positions] : model_positions) {
+        Model &model = models.at(index);
+        for (const auto &position : positions) {
+            auto model_space = glm::mat4(1.0f);
+            model_space      = glm::translate(model_space, position);
+            render_vars->object_shader.set_uniform_mat4f("u_model",
+                                                         model_space);
 
-        glm::mat4 object_model = glm::mat4(1.0f);
-        object_model           = glm::translate(object_model, pos);
-        float angle            = 20.0f * i;
-        object_model           = glm::rotate(object_model, glm::radians(angle),
-                                             glm::vec3(1.0f, 0.3f, 0.5f));
-        render_vars->object_shader.set_uniform_mat4f("u_model", object_model);
-        gl::draw_arrays(gl::DrawMode::TRIANGLES, 0, 36);
+            model.draw(render_vars->object_shader);
+        }
     }
 
     render_vars->light_shader.use();
+
+    render_vars->VAO->bind();
 
     render_vars->light_shader.set_uniform_mat4f("u_view",
                                                 render_vars->camera->view());

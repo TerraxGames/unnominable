@@ -14,7 +14,7 @@ struct DirectionalLight {
 
 uniform DirectionalLight u_global_illumination;
 #define u_light u_global_illumination
-uniform Material u_material;
+uniform Material u_material0;
 
 vec3 calculate_global_illumination(vec3 norm, vec3 initial_diffuse, vec3 view_dir, vec3 initial_specular) {
     // diffuse
@@ -24,7 +24,7 @@ vec3 calculate_global_illumination(vec3 norm, vec3 initial_diffuse, vec3 view_di
 
     // specular
     vec3 reflect_dir = reflect(-light_dir, norm);
-    float specular_dot = pow(max(dot(view_dir, reflect_dir), 0.0), u_material.luster);
+    float specular_dot = pow(max(dot(view_dir, reflect_dir), 0.0), u_material0.luster);
     vec3 specular = u_light.specular * specular_dot * initial_specular;
 
     return diffuse + specular;

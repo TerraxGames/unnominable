@@ -461,6 +461,14 @@ inline void viewport(GLint x, GLint y, GLsizei width, GLsizei height) {
     glViewport(x, y, width, height);
 }
 
+// Vertex Array Objects
+
+inline void bind_vertex_array(GLobject array) { glBindVertexArray(array); }
+
+inline void gen_vertex_arrays(size_t n, GLobject *arrays) {
+    glGenVertexArrays(n, arrays);
+}
+
 // Debug
 
 inline void debug_message_callback(GLDEBUGPROC callback, void *user_param) {

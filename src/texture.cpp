@@ -11,7 +11,7 @@ TextureUnit get_texture_unit(GLenum index) {
             std::format("Invalid texture unit #{}", index));
     }
 
-    return TextureUnit{index};
+    return TextureUnit{GL_TEXTURE0 + index};
 }
 
 Texture::Texture(TextureDimensionality type) { this->dimensionality_ = type; }

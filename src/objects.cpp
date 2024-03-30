@@ -21,11 +21,11 @@ void BufferObject::upload_data(size_t size, const void *data,
                  std::to_underlying(usage));
 }
 
-void VertexArrayObject::unbind() { glBindVertexArray(0); }
+void VertexArrayObject::unbind() { gl::bind_vertex_array(0); }
 
 VertexArrayObject::VertexArrayObject() { glGenVertexArrays(1, &this->object); }
 
-void VertexArrayObject::bind() { glBindVertexArray(this->object); }
+void VertexArrayObject::bind() { gl::bind_vertex_array(this->object); }
 
 void VertexArrayObject::init_vbo(size_t row_size, GLtype type) {
     this->stride = row_size * util::sizeof_gltype(type);

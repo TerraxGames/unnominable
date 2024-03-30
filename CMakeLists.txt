@@ -17,6 +17,8 @@ add_executable(${PROJECT_NAME}
         src/main.hpp
         src/math.cpp
         src/math.hpp
+        src/model.cpp
+        src/model.hpp
         src/objects.cpp
         src/objects.hpp
         src/render.cpp

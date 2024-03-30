@@ -41,7 +41,7 @@ in vec2 texcoord;
 
 uniform PointLight u_point_lights[MAX_NUM_LIGHTS];
 uniform int u_num_lights;
-uniform Material u_material;
+uniform Material u_material0;
 uniform vec3 u_ambient;
 
 vec3 calculate_global_illumination(vec3 norm, vec3 initial_diffuse, vec3 view_dir, vec3 initial_specular);
@@ -51,16 +51,16 @@ void main() {
     vec3 result;
 
     // ambient
-    result += u_ambient * texture(u_material.diffuse, texcoord).rgb;
+    result += u_ambient * texture(u_material0.diffuse, texcoord).rgb;
 
     // diffuse
     vec3 norm = normalize(normal);
-    vec4 diffuse_tex = texture(u_material.diffuse, texcoord);
+    vec4 diffuse_tex = texture(u_material0.diffuse, texcoord);
     vec3 initial_diffuse = diffuse_tex.a * diffuse_tex.rgb;
 
     // specular
     vec3 view_dir = normalize(-frag_pos); // view_pos - frag_pos
-    vec4 specular_tex = texture(u_material.specular, texcoord);
+    vec4 specular_tex = texture(u_material0.specular, texcoord);
     vec3 initial_specular = specular_tex.a * specular_tex.rgb;
 
     result += calculate_global_illumination(norm, initial_diffuse, view_dir, initial_specular);
@@ -70,7 +70,7 @@ void main() {
     }
 
     // emissive
-    // result += texture(u_material.emissive, texcoord).rgb;
+    result += texture(u_material0.emissive, texcoord).rgb;
 
     FragColor = vec4(result, 1.0);
 }
