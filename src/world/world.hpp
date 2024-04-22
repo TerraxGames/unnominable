@@ -8,6 +8,9 @@ namespace world {
 /// This is a position type used when rendering entities in the rendered world.
 typedef glm::vec3 RenderPos;
 
+/// A block's position.
+typedef glm::tvec3<int32_t> BlockPos;
+
 /// A position of a quadrant.
 /// Quadrants act like alternate universes in that each time a position
 /// coordinate exceeds -1024.0f or 1024.0f, it becomes mod(coordinate, 1024.0f),

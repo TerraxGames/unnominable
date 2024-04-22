@@ -155,6 +155,8 @@ consteval std::string get_texture_type_name(TextureType texture_type) {
         return "diffuse";
     case TextureType::SPECULAR:
         return "specular";
+    case TextureType::EMISSIVE:
+        return "emissive";
     case TextureType::MISC:
         return "misc";
     }
@@ -181,12 +183,12 @@ public:
     /// Generates the texture using glGenTextures.
     void generate();
     /// Binds the texture using glBindTexture.
-    void bind();
+    void bind() const;
     /// Generates the texture and then binds it.
     void bind_generate();
     /// Sets the active texture unit using glActiveTexture then binds the
     /// texture using glBindTexture.
-    void bind_active(TextureUnit texture_unit);
+    void bind_active(TextureUnit texture_unit) const;
 
     // TODO: make this into a varargs and automatically pick the right gl call
     /// Upload two-dimensional texture data.

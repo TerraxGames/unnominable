@@ -10,6 +10,10 @@ project(unnominable
 add_executable(${PROJECT_NAME}
         src/world/camera.cpp
         src/world/camera.hpp
+        src/world/chunk.cpp
+        src/world/chunk.hpp
+        src/world/planet.cpp
+        src/world/planet.hpp
         src/world/world.hpp
         src/log.cpp
         src/log.hpp

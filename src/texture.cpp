@@ -18,7 +18,7 @@ Texture::Texture(TextureDimensionality type) { this->dimensionality_ = type; }
 
 void Texture::generate() { glGenTextures(1, &this->object); }
 
-void Texture::bind() {
+void Texture::bind() const {
     glBindTexture(std::to_underlying(this->dimensionality()), this->object);
 }
 
@@ -27,7 +27,7 @@ void Texture::bind_generate() {
     this->bind();
 }
 
-void Texture::bind_active(TextureUnit texture_unit) {
+void Texture::bind_active(TextureUnit texture_unit) const {
     glActiveTexture(std::to_underlying(texture_unit));
     this->bind();
 }

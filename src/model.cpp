@@ -1,5 +1,6 @@
 #include "model.hpp"
 #include "log.hpp"
+#include "util.hpp"
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <ranges>
@@ -18,18 +19,30 @@ Mesh::Mesh(std::vector<Vertex> &vertices, std::vector<unsigned int> &indices,
     this->initialize_mesh();
 }
 
+Mesh::Mesh() {
+    this->vertices = std::vector<Vertex>();
+    this->indices  = std::vector<unsigned int>();
+    this->textures = std::vector<Texture>();
+}
+
 void Mesh::initialize_mesh() {
     this->VAO = std::make_unique<VertexArrayObject>();
     this->VBO = std::make_unique<BufferObject>(BufferType::ARRAY);
-    this->EBO = std::make_unique<BufferObject>(BufferType::ELEMENT_ARRAY);
+    if (this->draw_elements) {
+        this->EBO = std::make_unique<BufferObject>(BufferType::ELEMENT_ARRAY);
+    }
 
     this->VAO->bind();
     this->VBO->bind();
-    this->EBO->bind();
+    if (this->draw_elements) {
+        this->EBO->bind();
+    }
 
     this->VBO->upload_data(this->vertices, BufferUsage::STATIC_DRAW);
 
-    this->EBO->upload_data(this->indices, BufferUsage::STATIC_DRAW);
+    if (this->draw_elements) {
+        this->EBO->upload_data(this->indices, BufferUsage::STATIC_DRAW);
+    }
 
     this->VAO->init_vbo(8, GLtype::FLOAT);
     this->VAO->attrib_pointer_f(3, false);
@@ -40,7 +53,7 @@ void Mesh::initialize_mesh() {
     this->VAO->enable_attrib_array();
 }
 
-void Mesh::draw(Shader &shader) {
+void Mesh::draw(const Shader &shader) const {
     // bind textures
     int diffuse_index  = 0;
     int specular_index = 0;
@@ -79,8 +92,12 @@ void Mesh::draw(Shader &shader) {
 
     // draw mesh
     this->VAO->bind();
-    gl::draw_elements(gl::DrawMode::TRIANGLES, this->indices.size(),
-                      GLtype::UNSIGNED_INT, nullptr);
+    if (this->draw_elements) {
+        gl::draw_elements(gl::DrawMode::TRIANGLES, this->indices.size(),
+                          GLtype::UNSIGNED_INT, nullptr);
+    } else {
+        gl::draw_arrays(gl::DrawMode::TRIANGLES, 0, this->vertices.size());
+    }
     this->VAO->unbind();
 }
 
@@ -103,7 +120,7 @@ void Model::load(const std::string &path) {
 void Model::process_node(const aiNode &node, const aiScene &scene) {
     for (int i = 0; i < node.mNumMeshes; i++) {
         const aiMesh &mesh = *scene.mMeshes[node.mMeshes[i]];
-        this->meshes.emplace_back(this->process_mesh(mesh, scene));
+        this->meshes_.emplace_back(this->process_mesh(mesh, scene));
     }
 
     for (int i = 0; i < node.mNumChildren; i++) {
@@ -209,8 +226,8 @@ Model::load_material_textures(const aiMaterial &material,
     return textures;
 }
 
-void Model::draw(Shader &shader) {
-    for (auto &mesh : this->meshes) {
+void Model::draw(const Shader &shader) const {
+    for (auto &mesh : this->meshes_) {
         mesh.draw(shader);
     }
 }

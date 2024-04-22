@@ -47,14 +47,17 @@ public:
 
     void use();
 
-    GLuint get_uniform_loc(const std::string &name);
+    GLuint get_uniform_loc(const std::string &name) const;
 
-    void set_uniform_bool(const std::string &name, bool value);
-    void set_uniform_int(const std::string &name, GLint value);
-    void set_uniform_float(const std::string &name, GLfloat value);
-    void set_uniform_mat4f(const std::string &name, const glm::mat4 &value);
-    void set_uniform_vec3f(const std::string &name, const glm::vec3 &value);
-    void set_uniform_vec4f(const std::string &name, const glm::vec4 &value);
+    void set_uniform_bool(const std::string &name, bool value) const;
+    void set_uniform_int(const std::string &name, GLint value) const;
+    void set_uniform_float(const std::string &name, GLfloat value) const;
+    void set_uniform_mat4f(const std::string &name,
+                           const glm::mat4   &value) const;
+    void set_uniform_vec3f(const std::string &name,
+                           const glm::vec3   &value) const;
+    void set_uniform_vec4f(const std::string &name,
+                           const glm::vec4   &value) const;
 
     constexpr void set_uniform_bool(const std::string &parent,
                                     const std::string &name, bool value) {

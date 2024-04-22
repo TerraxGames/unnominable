@@ -58,35 +58,35 @@ void Shader::compile_and_link() {
 
 void Shader::use() { glUseProgram(this->shader_program); }
 
-GLuint Shader::get_uniform_loc(const std::string &name) {
+GLuint Shader::get_uniform_loc(const std::string &name) const {
     return glGetUniformLocation(this->shader_program, name.c_str());
 }
 
-void Shader::set_uniform_bool(const std::string &name, bool value) {
+void Shader::set_uniform_bool(const std::string &name, bool value) const {
     glUniform1i(this->get_uniform_loc(name), static_cast<GLint>(value));
 }
 
-void Shader::set_uniform_int(const std::string &name, GLint value) {
+void Shader::set_uniform_int(const std::string &name, GLint value) const {
     glUniform1i(this->get_uniform_loc(name), value);
 }
 
-void Shader::set_uniform_float(const std::string &name, GLfloat value) {
+void Shader::set_uniform_float(const std::string &name, GLfloat value) const {
     glUniform1f(this->get_uniform_loc(name), value);
 }
 
 void Shader::set_uniform_mat4f(const std::string &name,
-                               const glm::mat4   &value) {
+                               const glm::mat4   &value) const {
     glUniformMatrix4fv(this->get_uniform_loc(name), 1, GL_FALSE,
                        glm::value_ptr(value));
 }
 
 void Shader::set_uniform_vec3f(const std::string &name,
-                               const glm::vec3   &value) {
+                               const glm::vec3   &value) const {
     glUniform3fv(this->get_uniform_loc(name), 1, glm::value_ptr(value));
 }
 
 void Shader::set_uniform_vec4f(const std::string &name,
-                               const glm::vec4   &value) {
+                               const glm::vec4   &value) const {
     glUniform4fv(this->get_uniform_loc(name), 1, glm::value_ptr(value));
 }
 

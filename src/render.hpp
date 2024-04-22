@@ -5,6 +5,7 @@
 #include "shader.hpp"
 #include "texture.hpp"
 #include "world/camera.hpp"
+#include "world/planet.hpp"
 #include <glad/gl.h>
 #include <memory>
 
@@ -25,6 +26,8 @@ struct RenderVars {
     std::unique_ptr<ImageTexture> container_tex;
     std::unique_ptr<ImageTexture> container_specular_tex;
     std::unique_ptr<ImageTexture> emissive_tex;
+
+    std::unique_ptr<world::Planet> planet;
 
     GLint  success;
     GLchar info_log[512];

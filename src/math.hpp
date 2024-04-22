@@ -11,6 +11,7 @@
 #include <glm/gtc/matrix_transform.hpp> // IWYU pragma: keep
 #include <glm/gtc/quaternion.hpp>       // IWYU pragma: keep
 #include <glm/gtc/type_ptr.hpp>         // IWYU pragma: keep
+#include <glm/gtx/compatibility.hpp>    // IWYU pragma: keep
 #include <glm/gtx/quaternion.hpp>       // IWYU pragma: keep
 #include <glm/trigonometric.hpp>        // IWYU pragma: keep
 
@@ -24,6 +25,11 @@ public:
     static constexpr glm::vec3 DOWN  = glm::vec3(0.0f, -1.0f, 0.0f);
     static constexpr glm::vec3 NORTH = glm::vec3(0.0f, 0.0f, -1.0f);
     static constexpr glm::vec3 SOUTH = glm::vec3(0.0f, 0.0f, 1.0f);
+
+    static constexpr glm::vec3 RIGHT   = glm::vec3(1.0f, 0.0f, 0.0f);
+    static constexpr glm::vec3 LEFT    = glm::vec3(-1.0f, 0.0f, 0.0f);
+    static constexpr glm::vec3 FORWARD = glm::vec3(0.0f, 0.0f, 1.0f);
+    static constexpr glm::vec3 BACK    = glm::vec3(0.0f, 0.0f, -1.0f);
 };
 
 #define col_type glm::mat<4, 4, T, Q>::col_type

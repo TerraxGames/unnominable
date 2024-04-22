@@ -4,10 +4,10 @@
 #include "model.hpp"
 #include "objects.hpp"
 #include "shader.hpp"
-#include "texture.hpp"
 #include "types.hpp"
 #include "util.hpp"
 #include "world/camera.hpp"
+#include "world/planet.hpp"
 #include "world/world.hpp"
 #include <memory>
 #include <ranges>
@@ -32,107 +32,94 @@ namespace render {
 
 const std::array<GLfloat, 36 * 8> vertices = {
     // positions         // normals           // texture coords
-    -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.0f, 0.0f, //
-    0.5f,  -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 1.0f, 0.0f, //
-    0.5f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f, 1.0f, 1.0f, //
-    0.5f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f, 1.0f, 1.0f, //
-    -0.5f, 0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f, 0.0f, 1.0f, //
-    -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.0f, 0.0f, //
+    -1.0f, -1.0f, -1.0f, 0.0f,  0.0f,  -1.0f, 0.0f, 0.0f, //
+    1.0f,  -1.0f, -1.0f, 0.0f,  0.0f,  -1.0f, 1.0f, 0.0f, //
+    1.0f,  1.0f,  -1.0f, 0.0f,  0.0f,  -1.0f, 1.0f, 1.0f, //
+    1.0f,  1.0f,  -1.0f, 0.0f,  0.0f,  -1.0f, 1.0f, 1.0f, //
+    -1.0f, 1.0f,  -1.0f, 0.0f,  0.0f,  -1.0f, 0.0f, 1.0f, //
+    -1.0f, -1.0f, -1.0f, 0.0f,  0.0f,  -1.0f, 0.0f, 0.0f, //
 
-    -0.5f, -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f, //
-    0.5f,  -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 0.0f, //
-    0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f, //
-    0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f, //
-    -0.5f, 0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 1.0f, //
-    -0.5f, -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f, //
+    -1.0f, -1.0f, 1.0f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f, //
+    1.0f,  -1.0f, 1.0f,  0.0f,  0.0f,  1.0f,  1.0f, 0.0f, //
+    1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f, //
+    1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f, //
+    -1.0f, 1.0f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f, 1.0f, //
+    -1.0f, -1.0f, 1.0f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f, //
 
-    -0.5f, 0.5f,  0.5f,  -1.0f, 0.0f,  0.0f,  1.0f, 0.0f, //
-    -0.5f, 0.5f,  -0.5f, -1.0f, 0.0f,  0.0f,  1.0f, 1.0f, //
-    -0.5f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f,  0.0f, 1.0f, //
-    -0.5f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f,  0.0f, 1.0f, //
-    -0.5f, -0.5f, 0.5f,  -1.0f, 0.0f,  0.0f,  0.0f, 0.0f, //
-    -0.5f, 0.5f,  0.5f,  -1.0f, 0.0f,  0.0f,  1.0f, 0.0f, //
+    -1.0f, 1.0f,  1.0f,  -1.0f, 0.0f,  0.0f,  1.0f, 0.0f, //
+    -1.0f, 1.0f,  -1.0f, -1.0f, 0.0f,  0.0f,  1.0f, 1.0f, //
+    -1.0f, -1.0f, -1.0f, -1.0f, 0.0f,  0.0f,  0.0f, 1.0f, //
+    -1.0f, -1.0f, -1.0f, -1.0f, 0.0f,  0.0f,  0.0f, 1.0f, //
+    -1.0f, -1.0f, 1.0f,  -1.0f, 0.0f,  0.0f,  0.0f, 0.0f, //
+    -1.0f, 1.0f,  1.0f,  -1.0f, 0.0f,  0.0f,  1.0f, 0.0f, //
 
-    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, //
-    0.5f,  0.5f,  -0.5f, 1.0f,  0.0f,  0.0f,  1.0f, 1.0f, //
-    0.5f,  -0.5f, -0.5f, 1.0f,  0.0f,  0.0f,  0.0f, 1.0f, //
-    0.5f,  -0.5f, -0.5f, 1.0f,  0.0f,  0.0f,  0.0f, 1.0f, //
-    0.5f,  -0.5f, 0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f, //
-    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, //
+    1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, //
+    1.0f,  1.0f,  -1.0f, 1.0f,  0.0f,  0.0f,  1.0f, 1.0f, //
+    1.0f,  -1.0f, -1.0f, 1.0f,  0.0f,  0.0f,  0.0f, 1.0f, //
+    1.0f,  -1.0f, -1.0f, 1.0f,  0.0f,  0.0f,  0.0f, 1.0f, //
+    1.0f,  -1.0f, 1.0f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f, //
+    1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, //
 
-    -0.5f, -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,  0.0f, 1.0f, //
-    0.5f,  -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,  1.0f, 1.0f, //
-    0.5f,  -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,  1.0f, 0.0f, //
-    0.5f,  -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,  1.0f, 0.0f, //
-    -0.5f, -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,  0.0f, 0.0f, //
-    -0.5f, -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,  0.0f, 1.0f, //
+    -1.0f, -1.0f, -1.0f, 0.0f,  -1.0f, 0.0f,  0.0f, 1.0f, //
+    1.0f,  -1.0f, -1.0f, 0.0f,  -1.0f, 0.0f,  1.0f, 1.0f, //
+    1.0f,  -1.0f, 1.0f,  0.0f,  -1.0f, 0.0f,  1.0f, 0.0f, //
+    1.0f,  -1.0f, 1.0f,  0.0f,  -1.0f, 0.0f,  1.0f, 0.0f, //
+    -1.0f, -1.0f, 1.0f,  0.0f,  -1.0f, 0.0f,  0.0f, 0.0f, //
+    -1.0f, -1.0f, -1.0f, 0.0f,  -1.0f, 0.0f,  0.0f, 1.0f, //
 
-    -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,  0.0f, 1.0f, //
-    0.5f,  0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,  1.0f, 1.0f, //
-    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f, //
-    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f, //
-    -0.5f, 0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f, //
-    -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,  0.0f, 1.0f, //
-};
-
-std::array<glm::vec3, 10> cube_positions = {
-    glm::vec3(0.0f, 0.0f, 0.0f),     //
-    glm::vec3(2.0f, 5.0f, -15.0f),   //
-    glm::vec3(-1.5f, -2.2f, -2.5f),  //
-    glm::vec3(-3.8f, -2.0f, -12.3f), //
-    glm::vec3(2.4f, -0.4f, -3.5f),   //
-    glm::vec3(-1.7f, 3.0f, -7.5f),   //
-    glm::vec3(1.3f, -2.0f, -2.5f),   //
-    glm::vec3(1.5f, 2.0f, -2.5f),    //
-    glm::vec3(1.5f, 0.2f, -1.5f),    //
-    glm::vec3(-1.3f, 1.0f, -1.5f),   //
+    -1.0f, 1.0f,  -1.0f, 0.0f,  1.0f,  0.0f,  0.0f, 1.0f, //
+    1.0f,  1.0f,  -1.0f, 0.0f,  1.0f,  0.0f,  1.0f, 1.0f, //
+    1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f, //
+    1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f, //
+    -1.0f, 1.0f,  1.0f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f, //
+    -1.0f, 1.0f,  -1.0f, 0.0f,  1.0f,  0.0f,  0.0f, 1.0f, //
 };
 
 std::vector<PointLight> point_lights = {
-    PointLight{
-        .position  = glm::vec3(1.2f, 1.0f, 2.0f),
-        .diffuse   = glm::vec3(0.5f),
-        .specular  = glm::vec3(1.0f),
-        .constant  = 1.0f,
-        .linear    = 0.09f,
-        .quadratic = 0.032f,
-    },
-    PointLight{
-        .position  = glm::vec3(-2.5f, 2.0f, -1.5f),
-        .diffuse   = glm::vec3(0.75f, 0.25f, 0.75f),
-        .specular  = glm::vec3(1.0f, 0.5f, 1.0f),
-        .constant  = 1.0f,
-        .linear    = 0.045f,
-        .quadratic = 0.0075f,
-    },
-    PointLight{
-        .position  = glm::vec3(0.0f, 0.0f, -3.0f),
-        .diffuse   = glm::vec3(0.75f, 0.0f, 0.0f),
-        .specular  = glm::vec3(1.0f, 0.0f, 0.0f),
-        .constant  = 1.0f,
-        .linear    = 0.09f,
-        .quadratic = 0.032f,
-    },
+    // PointLight{
+    //     .position  = glm::vec3(1.2f, 1.0f, 2.0f),
+    //     .diffuse   = glm::vec3(0.5f),
+    //     .specular  = glm::vec3(1.0f),
+    //     .constant  = 1.0f,
+    //     .linear    = 0.09f,
+    //     .quadratic = 0.032f,
+    // },
+    // PointLight{
+    //     .position  = glm::vec3(-2.5f, 2.0f, -1.5f),
+    //     .diffuse   = glm::vec3(0.75f, 0.25f, 0.75f),
+    //     .specular  = glm::vec3(1.0f, 0.5f, 1.0f),
+    //     .constant  = 1.0f,
+    //     .linear    = 0.045f,
+    //     .quadratic = 0.0075f,
+    // },
+    // PointLight{
+    //     .position  = glm::vec3(0.0f, 0.0f, -3.0f),
+    //     .diffuse   = glm::vec3(0.75f, 0.0f, 0.0f),
+    //     .specular  = glm::vec3(1.0f, 0.0f, 0.0f),
+    //     .constant  = 1.0f,
+    //     .linear    = 0.09f,
+    //     .quadratic = 0.032f,
+    // },
 };
 
 std::vector<Model> models{};
 
 std::map<size_t, std::vector<glm::vec3>> model_positions = {
-    {
-        0,
-        {
-            glm::vec3(0.0f, 0.0f, 0.0f),
-            // glm::vec3(2.0f, 5.0f, -15.0f),
-            // glm::vec3(-1.5f, -2.2f, -2.5f),
-            // glm::vec3(-3.8f, -2.0f, -12.3f),
-            // glm::vec3(2.4f, -0.4f, -3.5f),
-            // glm::vec3(-1.7f, 3.0f, -7.5f),
-            // glm::vec3(1.3f, -2.0f, -2.5f),
-            // glm::vec3(1.5f, 2.0f, -2.5f),
-            // glm::vec3(1.5f, 0.2f, -1.5f),
-            // glm::vec3(-1.3f, 1.0f, -1.5f),
-        },
-    },
+    // {
+    //     0,
+    //     {
+    //         glm::vec3(0.0f, 0.0f, 0.0f),
+    //         // glm::vec3(2.0f, 5.0f, -15.0f),
+    //         // glm::vec3(-3.0f, -2.0f, -3.0f),
+    //         // glm::vec3(-4.0f, -2.0f, -12.0f),
+    //         // glm::vec3(2.4f, -0.4f, -3.5f),
+    //         // glm::vec3(-1.7f, 3.0f, -7.5f),
+    //         // glm::vec3(1.3f, -2.0f, -2.5f),
+    //         // glm::vec3(1.5f, 2.0f, -2.5f),
+    //         // glm::vec3(1.5f, 0.2f, -1.5f),
+    //         // glm::vec3(-1.3f, 1.0f, -1.5f),
+    //     },
+    // },
 };
 
 bool init(RenderVars *render_vars) {
@@ -171,10 +158,12 @@ bool init(RenderVars *render_vars) {
 #endif
 
     gl::enable(gl::Capability::DEPTH_TEST);
+    gl::enable(gl::Capability::CULL_FACE);
+    glCullFace(GL_BACK);
 
     gl::viewport(0, 0, render_vars->window_width, render_vars->window_height);
 
-    gl::clear_color(0.1f, 0.1f, 0.1f, 1.0f);
+    gl::clear_color(0.1f, 0.3f, 0.4f, 1.0f);
 
     render_vars->object_shader = Shader();
     render_vars->object_shader.add_shader_path(ShaderType::VERTEX,
@@ -218,34 +207,11 @@ bool init(RenderVars *render_vars) {
     render_vars->VAO = std::move(VAO);
     render_vars->VBO = std::move(VBO);
 
-    auto container_tex =
-        std::make_unique<ImageTexture>("textures/container2.png");
-    container_tex->bind_generate();
-    container_tex->default_parameters();
-    container_tex->upload();
-    container_tex->generate_mipmap();
-    container_tex->free_surface();
-    render_vars->container_tex = std::move(container_tex);
+    // Model test_model("models/cube/cube.obj");
+    // models.emplace_back(std::move(test_model));
 
-    auto container_specular_tex =
-        std::make_unique<ImageTexture>("textures/container2_specular.png");
-    container_specular_tex->bind_generate();
-    container_specular_tex->default_parameters();
-    container_specular_tex->upload();
-    container_specular_tex->generate_mipmap();
-    container_specular_tex->free_surface();
-    render_vars->container_specular_tex = std::move(container_specular_tex);
-
-    auto emissive_tex = std::make_unique<ImageTexture>("textures/matrix.jpg");
-    emissive_tex->bind_generate();
-    emissive_tex->default_parameters();
-    emissive_tex->upload();
-    emissive_tex->generate_mipmap();
-    emissive_tex->free_surface();
-    render_vars->emissive_tex = std::move(emissive_tex);
-
-    Model test_model("models/backpack/backpack.obj");
-    models.emplace_back(std::move(test_model));
+    auto planet         = std::make_unique<world::Planet>();
+    render_vars->planet = std::move(planet);
 
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
@@ -263,8 +229,6 @@ void render(RenderVars *render_vars, uint64_t delta_time) {
     // const float spotlight_angle    = glm::radians(12.5f);
 
     render_vars->object_shader.use();
-
-    render_vars->VAO->bind();
 
     render_vars->object_shader.set_uniform_vec3f("u_ambient",
                                                  glm::vec3(0.2f, 0.2f, 0.2f));
@@ -308,7 +272,7 @@ void render(RenderVars *render_vars, uint64_t delta_time) {
                          render_vars->window_height;
 
     glm::mat4 projection =
-        glm::perspective(glm::radians(45.0f), aspect_ratio, 0.1f, 100.0f);
+        glm::perspective(glm::radians(75.0f), aspect_ratio, 0.1f, 100.0f);
     render_vars->object_shader.set_uniform_mat4f("u_projection", projection);
 
     render_vars->object_shader.set_uniform_mat4f("u_model", glm::mat4(1.0f));
@@ -325,6 +289,12 @@ void render(RenderVars *render_vars, uint64_t delta_time) {
             model.draw(render_vars->object_shader);
         }
     }
+
+    auto model = glm::mat4(1.0f);
+    glm::scale(model, glm::vec3(8.0f));
+    glm::translate(model, glm::vec3(1.0f, 0.0f, -1.0f));
+    render_vars->object_shader.set_uniform_mat4f("u_model", model);
+    render_vars->planet->draw(render_vars->object_shader);
 
     render_vars->light_shader.use();
 
