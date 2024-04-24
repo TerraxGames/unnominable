@@ -19,6 +19,7 @@ struct RenderVars {
 
     Shader object_shader;
     Shader light_shader;
+    Shader debug_shader;
 
     std::unique_ptr<world::Camera> camera;
     static constexpr float         camera_speed = 0.005f;

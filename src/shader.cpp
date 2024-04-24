@@ -56,7 +56,7 @@ void Shader::compile_and_link() {
     this->shader_objects.clear();
 }
 
-void Shader::use() { glUseProgram(this->shader_program); }
+void Shader::use() const { glUseProgram(this->shader_program); }
 
 GLuint Shader::get_uniform_loc(const std::string &name) const {
     return glGetUniformLocation(this->shader_program, name.c_str());

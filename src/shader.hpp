@@ -45,7 +45,7 @@ public:
 
     void compile_and_link(); // todo: use exceptions
 
-    void use();
+    void use() const;
 
     GLuint get_uniform_loc(const std::string &name) const;
 

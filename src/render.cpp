@@ -160,6 +160,7 @@ bool init(RenderVars *render_vars) {
     gl::enable(gl::Capability::DEPTH_TEST);
     gl::enable(gl::Capability::CULL_FACE);
     glCullFace(GL_BACK);
+    glPointSize(8.0f);
 
     gl::viewport(0, 0, render_vars->window_width, render_vars->window_height);
 
@@ -179,6 +180,13 @@ bool init(RenderVars *render_vars) {
     render_vars->light_shader.add_shader_path(ShaderType::FRAGMENT,
                                               "light.frag");
     render_vars->light_shader.compile_and_link();
+
+    render_vars->debug_shader = Shader();
+    render_vars->debug_shader.add_shader_path(ShaderType::VERTEX,
+                                              "generic.vert");
+    render_vars->debug_shader.add_shader_path(ShaderType::FRAGMENT,
+                                              "debug.frag");
+    render_vars->debug_shader.compile_and_link();
 
     // set up camera
     render_vars->camera =
@@ -293,8 +301,14 @@ void render(RenderVars *render_vars, uint64_t delta_time) {
     auto model = glm::mat4(1.0f);
     glm::scale(model, glm::vec3(8.0f));
     glm::translate(model, glm::vec3(1.0f, 0.0f, -1.0f));
-    render_vars->object_shader.set_uniform_mat4f("u_model", model);
-    render_vars->planet->draw(render_vars->object_shader);
+    // render_vars->object_shader.set_uniform_mat4f("u_model", model);
+    // render_vars->planet->draw(render_vars->object_shader);
+    render_vars->debug_shader.use();
+    render_vars->debug_shader.set_uniform_mat4f("u_model", model);
+    render_vars->debug_shader.set_uniform_mat4f("u_view",
+                                                render_vars->camera->view());
+    render_vars->debug_shader.set_uniform_mat4f("u_projection", projection);
+    render_vars->planet->sphere_mesh.draw_points();
 
     render_vars->light_shader.use();
 
