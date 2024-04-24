@@ -9,14 +9,14 @@ SphereMesh::SphereMesh(int resolution) {
     std::vector<glm::vec3>    vertices{};
     std::vector<unsigned int> indices{};
 
-    // bottom west-east edge
+    // west face
     for (int x = 0; x < resolution; x++) {
         float progress_x = static_cast<float>(x) / resolution;
         for (int y = 0; y < resolution; y++) {
-            float progress_y = static_cast<float>(x) / resolution - 1.0f;
-            vertices.emplace_back(glm::lerp(glm::vec3(-1.0f, progress_y, -1.0f),
-                                            glm::vec3(1.0f, progress_y, -1.0f),
-                                            progress_x));
+            float progress_y = static_cast<float>(y) / resolution;
+            float actual_y   = glm::lerp(-0.5f, 0.5f, progress_y);
+            float actual_x   = glm::lerp(-0.5f, 0.5f, progress_x);
+            vertices.emplace_back(glm::vec3(actual_x, actual_y, -0.5f));
         }
     }
 
@@ -58,7 +58,7 @@ void SphereMesh::draw_points() const {
     this->vao->unbind();
 }
 
-Planet::Planet() : sphere_mesh(world::SphereMesh(3)) {}
+Planet::Planet() : sphere_mesh(world::SphereMesh(4)) {}
 
 void Planet::draw(const Shader &shader) const {
     this->sphere_mesh.mesh().draw(shader);
