@@ -299,10 +299,10 @@ void render(RenderVars *render_vars, uint64_t delta_time) {
     }
 
     auto model = glm::mat4(1.0f);
-    glm::scale(model, glm::vec3(8.0f));
-    glm::translate(model, glm::vec3(1.0f, 0.0f, -1.0f));
-    // render_vars->object_shader.set_uniform_mat4f("u_model", model);
-    // render_vars->planet->draw(render_vars->object_shader);
+    // glm::scale(model, glm::vec3(8.0f));
+    // glm::translate(model, glm::vec3(1.0f, 0.0f, -1.0f));
+    render_vars->object_shader.set_uniform_mat4f("u_model", model);
+    render_vars->planet->draw(render_vars->object_shader);
     render_vars->debug_shader.use();
     render_vars->debug_shader.set_uniform_mat4f("u_model", model);
     render_vars->debug_shader.set_uniform_mat4f("u_view",

@@ -9,14 +9,48 @@ SphereMesh::SphereMesh(int resolution) {
     std::vector<glm::vec3>    vertices{};
     std::vector<unsigned int> indices{};
 
-    // west face
-    for (int x = 0; x < resolution; x++) {
+    // north face
+    for (int x = 0; x <= resolution; x++) {
         float progress_x = static_cast<float>(x) / resolution;
-        for (int y = 0; y < resolution; y++) {
+        for (int y = 0; y <= resolution; y++) {
+            // calculate & push vertex
             float progress_y = static_cast<float>(y) / resolution;
-            float actual_y   = glm::lerp(-0.5f, 0.5f, progress_y);
-            float actual_x   = glm::lerp(-0.5f, 0.5f, progress_x);
-            vertices.emplace_back(glm::vec3(actual_x, actual_y, -0.5f));
+            float y_result   = glm::lerp(-1.0f, 1.0f, progress_y);
+            float x_result   = glm::lerp(-1.0f, 1.0f, progress_x);
+            vertices.emplace_back(glm::vec3(x_result, y_result, -1.0f));
+        }
+    }
+
+    // south face
+    for (int x = 0; x <= resolution; x++) {
+        float progress_x = static_cast<float>(x) / resolution;
+        for (int y = 0; y <= resolution; y++) {
+            float progress_y = static_cast<float>(y) / resolution;
+            float y_result   = glm::lerp(-1.0f, 1.0f, progress_y);
+            float x_result   = glm::lerp(-1.0f, 1.0f, progress_x);
+            vertices.emplace_back(glm::vec3(x_result, y_result, 1.0f));
+        }
+    }
+
+    // east face
+    for (int z = 0; z <= resolution; z++) {
+        float progress_z = static_cast<float>(z) / resolution;
+        for (int y = 0; y <= resolution; y++) {
+            float progress_y = static_cast<float>(y) / resolution;
+            float y_result   = glm::lerp(-1.0f, 1.0f, progress_y);
+            float z_result   = glm::lerp(-1.0f, 1.0f, progress_z);
+            vertices.emplace_back(glm::vec3(1.0f, y_result, z_result));
+        }
+    }
+
+    // west face
+    for (int z = 0; z <= resolution; z++) {
+        float progress_z = static_cast<float>(z) / resolution;
+        for (int y = 0; y <= resolution; y++) {
+            float progress_y = static_cast<float>(y) / resolution;
+            float y_result   = glm::lerp(-1.0f, 1.0f, progress_y);
+            float z_result   = glm::lerp(-1.0f, 1.0f, progress_z);
+            vertices.emplace_back(glm::vec3(-1.0f, y_result, z_result));
         }
     }
 
@@ -54,7 +88,7 @@ SphereMesh::SphereMesh(int resolution) {
 
 void SphereMesh::draw_points() const {
     this->vao->bind();
-    gl::draw_arrays(gl::DrawMode::POINTS, 0, this->vertices.size() * 3);
+    gl::draw_arrays(gl::DrawMode::POINTS, 0, this->vertices.size());
     this->vao->unbind();
 }
 
