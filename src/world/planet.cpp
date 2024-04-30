@@ -41,7 +41,9 @@ SphereMesh::SphereMesh(int resolution) {
 
     for (int i = 1; i <= resolution * resolution + (resolution - 1); i++) {
         if (i % (resolution + 1) == 0) {
-            // apply hack if we're about to wrap behind
+            // Apply hack if we're about to wrap behind.
+            // If we don't do this, it will create a face on the back-side at
+            // the wrong points.
             i++;
         }
         indices.emplace_back(i);
