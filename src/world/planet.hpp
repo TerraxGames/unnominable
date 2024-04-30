@@ -6,13 +6,18 @@
 
 namespace world {
 
+struct PointVertex {
+    glm::vec3 pos;
+    glm::vec2 face_pos;
+};
+
 // https://www.binpress.com/creating-octahedron-sphere-unity/
 class SphereMesh {
 private:
     render::Mesh                       mesh_;
     std::unique_ptr<VertexArrayObject> vao;
     std::unique_ptr<BufferObject>      vbo;
-    std::vector<glm::vec3>             vertices;
+    std::vector<PointVertex>           vertices;
 
 public:
     SphereMesh(int resolution);

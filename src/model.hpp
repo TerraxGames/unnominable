@@ -15,12 +15,6 @@ struct Vertex {
     glm::vec3 position;
     glm::vec3 normal;
     glm::vec2 texcoords;
-
-    Vertex() {}
-    Vertex(std::initializer_list<float> list)
-        : position(list.begin()[0], list.begin()[1], list.begin()[2]),
-          normal(list.begin()[3], list.begin()[4], list.begin()[5]),
-          texcoords(list.begin()[6], list.begin()[7]) {}
 };
 // ask the compiler to pretty please reject this type if its largest
 // primitive isn't 4 bytes
